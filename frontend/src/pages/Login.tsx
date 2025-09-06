@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,9 +16,9 @@ export default function Login() {
   const [lastName, setLastName] = useState("");
   const [walletAddress, setWalletAddress] = useState("");
   const [role, setRole] = useState<'farmer' | 'investor'>('investor');
-  const [isLogin, setIsLogin] = useState(true);
   
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const { setUser } = useAppStore();
   const { toast } = useToast();
@@ -92,6 +92,7 @@ export default function Login() {
     navigate(`/${demoRole}`);
   };
 
+  const isLogin = location.pathname === '/login';
   const isLoginValid = email.length > 0 && password.length > 0;
   const isSignupValid = (
     email.length > 0 &&
@@ -218,7 +219,7 @@ export default function Login() {
           <Button
             variant="ghost"
             className="w-full"
-            onClick={() => setIsLogin(!isLogin)}
+            onClick={() => navigate(isLogin ? '/signup' : '/login')}
           >
             {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
           </Button>
