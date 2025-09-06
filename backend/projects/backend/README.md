@@ -65,7 +65,7 @@ This template provides a set of [algokit generators](https://github.com/algorand
 
 ### Generate Smart Contract 
 
-By default the template creates a single `HelloWorld` contract under agritoken_backend folder in the `smart_contracts` directory. To add a new contract:
+By default the template creates a single `HelloWorld` contract under tokenize_farm folder in the `smart_contracts` directory. To add a new contract:
 
 1. From the root of the project (`../`) execute `algokit generate smart-contract`. This will create a new starter smart contract and deployment configuration file under `{your_contract_name}` subfolder in the `smart_contracts` directory.
 2. Each contract potentially has different creation parameters and deployment steps. Hence, you need to define your deployment logic in `deploy_config.py`file.
