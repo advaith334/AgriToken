@@ -132,32 +132,6 @@ export default function Login() {
             </Button>
           </form>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">Or try demo</span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            <Button 
-              variant="outline" 
-              onClick={() => handleDemoLogin('farmer')}
-              className="w-full"
-            >
-              Demo Farmer
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => handleDemoLogin('investor')}
-              className="w-full"
-            >
-              Demo Investor
-            </Button>
-          </div>
-
           <Button
             variant="ghost"
             className="w-full"
