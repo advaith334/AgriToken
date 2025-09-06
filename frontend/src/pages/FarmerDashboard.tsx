@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -27,6 +28,7 @@ const yieldData = [
 ];
 
 export default function FarmerDashboard() {
+  const navigate = useNavigate();
   const { user, farms, distributions, addDistribution } = useAppStore();
   const { toast } = useToast();
   const [isSimulating, setIsSimulating] = useState(false);
@@ -240,9 +242,13 @@ export default function FarmerDashboard() {
         <TabsContent value="farms" className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-semibold">My Farms</h2>
-            <Button variant="hero" className="gap-2">
+            <Button 
+              variant="hero" 
+              className="gap-2"
+              onClick={() => navigate('/farmer/add-listing')}
+            >
               <Plus className="h-4 w-4" />
-              Add Farm
+              Add Farm Listing
             </Button>
           </div>
 

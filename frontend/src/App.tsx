@@ -9,6 +9,8 @@ import Login from "./pages/Login";
 import FarmerDashboard from "./pages/FarmerDashboard";
 import InvestorDashboard from "./pages/InvestorDashboard";
 import ExploreFarms from "./pages/ExploreFarms";
+import FarmerOptions from "./pages/FarmerOptions";
+import AddFarmListing from "./pages/AddFarmListing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +27,8 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Login />} />
           <Route path="/farmer" element={<FarmerDashboard />} />
+          <Route path="/farmer/options" element={<FarmerOptions />} />
+          <Route path="/farmer/add-listing" element={<AddFarmListing />} />
           <Route path="/investor" element={<InvestorDashboard />} />
           <Route path="/explore" element={<ExploreFarms />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

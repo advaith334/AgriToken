@@ -58,8 +58,12 @@ export default function Login() {
       description: `Welcome to AgriToken, ${newUser.name}!`,
     });
 
-    // Navigate to appropriate dashboard
-    navigate(`/${role}`);
+    // Navigate to appropriate dashboard or options
+    if (role === 'farmer') {
+      navigate('/farmer/options');
+    } else {
+      navigate(`/${role}`);
+    }
   };
 
   const handleDemoLogin = (demoRole: 'farmer' | 'investor') => {
@@ -89,7 +93,11 @@ export default function Login() {
       description: `Logged in as ${users[demoRole].name}`,
     });
 
-    navigate(`/${demoRole}`);
+    if (demoRole === 'farmer') {
+      navigate('/farmer/options');
+    } else {
+      navigate(`/${demoRole}`);
+    }
   };
 
   const isLoginValid = email.length > 0 && password.length > 0;
@@ -177,6 +185,17 @@ export default function Login() {
                   onChange={(e) => setWalletAddress(e.target.value)}
                   required
                 />
+                <p className="text-sm text-muted-foreground">
+                  Don't have a Pera Wallet Account?{" "}
+                  <a 
+                    href="https://perawallet.app/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-700 underline"
+                  >
+                    Click Here
+                  </a>
+                </p>
               </div>
               </>
             )}
