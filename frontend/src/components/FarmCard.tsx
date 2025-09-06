@@ -150,19 +150,6 @@ export function FarmCard({ farm, onInvest }: FarmCardProps) {
             <Mail className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">{farm["Farm Email"]}</span>
           </div>
-          {farm["Farm Website"] && (
-            <div className="flex items-center gap-2">
-              <Globe className="h-4 w-4 text-muted-foreground" />
-              <a 
-                href={farm["Farm Website"]} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline text-sm"
-              >
-                Visit Website
-              </a>
-            </div>
-          )}
         </div>
       </CardContent>
 
