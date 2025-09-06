@@ -19,7 +19,7 @@ from algosdk.v2client.models import SimulateTraceConfig
 import algokit_utils
 from algokit_utils import AlgorandClient as _AlgoKitAlgorandClient
 
-_APP_SPEC_JSON = r"""{"arcs": [22, 28], "bareActions": {"call": [], "create": ["NoOp"]}, "methods": [{"actions": {"call": ["NoOp"], "create": []}, "args": [{"type": "string", "name": "name"}], "name": "hello", "returns": {"type": "string"}, "events": [], "readonly": false, "recommendations": {}}], "name": "TokenizeFarm", "state": {"keys": {"box": {}, "global": {}, "local": {}}, "maps": {"box": {}, "global": {}, "local": {}}, "schema": {"global": {"bytes": 0, "ints": 0}, "local": {"bytes": 0, "ints": 0}}}, "structs": {}, "byteCode": {"approval": "CjEbQQA0gAQCvs4RNhoAjgEAA4EAQzEZFEQxGEQ2GgFXAgCIACBJFRZXBgJMUIAEFR98dUxQsIEBQzEZQP/UMRgURIEBQ4oBAYAHSGVsbG8sIIv/UIk=", "clear": "CoEBQw=="}, "events": [], "networks": {}, "source": {"approval": "I3ByYWdtYSB2ZXJzaW9uIDEwCiNwcmFnbWEgdHlwZXRyYWNrIGZhbHNlCgovLyBhbGdvcHkuYXJjNC5BUkM0Q29udHJhY3QuYXBwcm92YWxfcHJvZ3JhbSgpIC0+IHVpbnQ2NDoKbWFpbjoKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy90b2tlbml6ZV9mYXJtL2NvbnRyYWN0LnB5OjUKICAgIC8vIGNsYXNzIFRva2VuaXplRmFybShBUkM0Q29udHJhY3QpOgogICAgdHhuIE51bUFwcEFyZ3MKICAgIGJ6IG1haW5fYmFyZV9yb3V0aW5nQDYKICAgIHB1c2hieXRlcyAweDAyYmVjZTExIC8vIG1ldGhvZCAiaGVsbG8oc3RyaW5nKXN0cmluZyIKICAgIHR4bmEgQXBwbGljYXRpb25BcmdzIDAKICAgIG1hdGNoIG1haW5faGVsbG9fcm91dGVAMwoKbWFpbl9hZnRlcl9pZl9lbHNlQDEwOgogICAgLy8gc21hcnRfY29udHJhY3RzL3Rva2VuaXplX2Zhcm0vY29udHJhY3QucHk6NQogICAgLy8gY2xhc3MgVG9rZW5pemVGYXJtKEFSQzRDb250cmFjdCk6CiAgICBwdXNoaW50IDAgLy8gMAogICAgcmV0dXJuCgptYWluX2hlbGxvX3JvdXRlQDM6CiAgICAvLyBzbWFydF9jb250cmFjdHMvdG9rZW5pemVfZmFybS9jb250cmFjdC5weTo2CiAgICAvLyBAYWJpbWV0aG9kKCkKICAgIHR4biBPbkNvbXBsZXRpb24KICAgICEKICAgIGFzc2VydCAvLyBPbkNvbXBsZXRpb24gaXMgbm90IE5vT3AKICAgIHR4biBBcHBsaWNhdGlvbklECiAgICBhc3NlcnQgLy8gY2FuIG9ubHkgY2FsbCB3aGVuIG5vdCBjcmVhdGluZwogICAgLy8gc21hcnRfY29udHJhY3RzL3Rva2VuaXplX2Zhcm0vY29udHJhY3QucHk6NQogICAgLy8gY2xhc3MgVG9rZW5pemVGYXJtKEFSQzRDb250cmFjdCk6CiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAxCiAgICBleHRyYWN0IDIgMAogICAgLy8gc21hcnRfY29udHJhY3RzL3Rva2VuaXplX2Zhcm0vY29udHJhY3QucHk6NgogICAgLy8gQGFiaW1ldGhvZCgpCiAgICBjYWxsc3ViIGhlbGxvCiAgICBkdXAKICAgIGxlbgogICAgaXRvYgogICAgZXh0cmFjdCA2IDIKICAgIHN3YXAKICAgIGNvbmNhdAogICAgcHVzaGJ5dGVzIDB4MTUxZjdjNzUKICAgIHN3YXAKICAgIGNvbmNhdAogICAgbG9nCiAgICBwdXNoaW50IDEgLy8gMQogICAgcmV0dXJuCgptYWluX2JhcmVfcm91dGluZ0A2OgogICAgLy8gc21hcnRfY29udHJhY3RzL3Rva2VuaXplX2Zhcm0vY29udHJhY3QucHk6NQogICAgLy8gY2xhc3MgVG9rZW5pemVGYXJtKEFSQzRDb250cmFjdCk6CiAgICB0eG4gT25Db21wbGV0aW9uCiAgICBibnogbWFpbl9hZnRlcl9pZl9lbHNlQDEwCiAgICB0eG4gQXBwbGljYXRpb25JRAogICAgIQogICAgYXNzZXJ0IC8vIGNhbiBvbmx5IGNhbGwgd2hlbiBjcmVhdGluZwogICAgcHVzaGludCAxIC8vIDEKICAgIHJldHVybgoKCi8vIHNtYXJ0X2NvbnRyYWN0cy50b2tlbml6ZV9mYXJtLmNvbnRyYWN0LlRva2VuaXplRmFybS5oZWxsbyhuYW1lOiBieXRlcykgLT4gYnl0ZXM6CmhlbGxvOgogICAgLy8gc21hcnRfY29udHJhY3RzL3Rva2VuaXplX2Zhcm0vY29udHJhY3QucHk6Ni03CiAgICAvLyBAYWJpbWV0aG9kKCkKICAgIC8vIGRlZiBoZWxsbyhzZWxmLCBuYW1lOiBTdHJpbmcpIC0+IFN0cmluZzoKICAgIHByb3RvIDEgMQogICAgLy8gc21hcnRfY29udHJhY3RzL3Rva2VuaXplX2Zhcm0vY29udHJhY3QucHk6OAogICAgLy8gcmV0dXJuICJIZWxsbywgIiArIG5hbWUKICAgIHB1c2hieXRlcyAiSGVsbG8sICIKICAgIGZyYW1lX2RpZyAtMQogICAgY29uY2F0CiAgICByZXRzdWIK", "clear": "I3ByYWdtYSB2ZXJzaW9uIDEwCiNwcmFnbWEgdHlwZXRyYWNrIGZhbHNlCgovLyBhbGdvcHkuYXJjNC5BUkM0Q29udHJhY3QuY2xlYXJfc3RhdGVfcHJvZ3JhbSgpIC0+IHVpbnQ2NDoKbWFpbjoKICAgIHB1c2hpbnQgMSAvLyAxCiAgICByZXR1cm4K"}, "sourceInfo": {"approval": {"pcOffsetMethod": "none", "sourceInfo": [{"pc": [25], "errorMessage": "OnCompletion is not NoOp"}, {"pc": [66], "errorMessage": "can only call when creating"}, {"pc": [28], "errorMessage": "can only call when not creating"}]}, "clear": {"pcOffsetMethod": "none", "sourceInfo": []}}, "templateVariables": {}}"""
+_APP_SPEC_JSON = r"""{"arcs": [22, 28], "bareActions": {"call": [], "create": ["NoOp"]}, "methods": [{"actions": {"call": ["NoOp"], "create": []}, "args": [{"type": "string", "name": "farm_name"}, {"type": "uint64", "name": "asset_id"}], "name": "initialize_farm", "returns": {"type": "string"}, "desc": "Initialize the farm tokenization with farm data and asset information", "events": [], "readonly": false, "recommendations": {}}, {"actions": {"call": ["NoOp"], "create": []}, "args": [], "name": "get_farm_name", "returns": {"type": "string"}, "desc": "Get farm name", "events": [], "readonly": false, "recommendations": {}}, {"actions": {"call": ["NoOp"], "create": []}, "args": [], "name": "get_asset_id", "returns": {"type": "uint64"}, "desc": "Get asset ID", "events": [], "readonly": false, "recommendations": {}}, {"actions": {"call": ["NoOp"], "create": []}, "args": [], "name": "get_total_minted", "returns": {"type": "uint64"}, "desc": "Get total tokens minted", "events": [], "readonly": false, "recommendations": {}}, {"actions": {"call": ["NoOp"], "create": []}, "args": [], "name": "get_owner", "returns": {"type": "address"}, "desc": "Get contract owner", "events": [], "readonly": false, "recommendations": {}}, {"actions": {"call": ["NoOp"], "create": []}, "args": [{"type": "string", "name": "new_farm_name"}], "name": "update_farm_name", "returns": {"type": "string"}, "desc": "Update farm name (only owner)", "events": [], "readonly": false, "recommendations": {}}, {"actions": {"call": ["NoOp"], "create": []}, "args": [{"type": "string", "name": "name"}], "name": "hello", "returns": {"type": "string"}, "desc": "Legacy hello method for testing", "events": [], "readonly": false, "recommendations": {}}], "name": "TokenizeFarm", "state": {"keys": {"box": {}, "global": {"farm_name": {"key": "ZmFybV9uYW1l", "keyType": "AVMString", "valueType": "AVMString"}, "asset_id": {"key": "YXNzZXRfaWQ=", "keyType": "AVMString", "valueType": "AVMUint64"}, "total_tokens_minted": {"key": "dG90YWxfdG9rZW5zX21pbnRlZA==", "keyType": "AVMString", "valueType": "AVMUint64"}, "is_initialized": {"key": "aXNfaW5pdGlhbGl6ZWQ=", "keyType": "AVMString", "valueType": "AVMUint64"}, "owner": {"key": "b3duZXI=", "keyType": "AVMString", "valueType": "address"}}, "local": {}}, "maps": {"box": {}, "global": {}, "local": {}}, "schema": {"global": {"bytes": 2, "ints": 3}, "local": {"bytes": 0, "ints": 0}}}, "structs": {}, "byteCode": {"approval": "CiACAAEmBgQVH3x1DmlzX2luaXRpYWxpemVkCWZhcm1fbmFtZQVvd25lcghhc3NldF9pZBN0b3RhbF90b2tlbnNfbWludGVkMRtBAOKCBwSCu0l5BOR3PZ4EW6IqhAQi5MWgBP8rpcUEVfDTjQQCvs4RNhoAjgcAiABwAF8ATgA+ACAAAiJDMRkURDEYRDYaAVcCAIgBTEkVFlcGAkxQKExQsCNDMRkURDEYRDYaAVcCAIgA+UkVFlcGAkxQKExQsCNDMRkURDEYRIgA1yhMULAjQzEZFEQxGESIALwWKExQsCNDMRkURDEYRIgAoBYoTFCwI0MxGRREMRhEiACFSRUWVwYCTFAoTFCwI0MxGRREMRhENhoBVwIANhoCF4gAGUkVFlcGAkxQKExQsCNDMRlA/1ExGBREI0OKAgEiKWVEFEQqi/5nJwSL/2crMQBnKSNnJwUiZ4AqRmFybSB0b2tlbml6YXRpb24gaW5pdGlhbGl6ZWQgc3VjY2Vzc2Z1bGx5iSIpZUREIiplRIkiKWVERCInBGVEiSIpZUREIicFZUSJIillREQiK2VEiYoBASIpZUREMQAiK2VEEkQqi/9ngB5GYXJtIG5hbWUgdXBkYXRlZCBzdWNjZXNzZnVsbHmJigEBgAdIZWxsbywgi/9QiQ==", "clear": "CoEBQw=="}, "events": [], "networks": {}, "source": {"approval": "I3ByYWdtYSB2ZXJzaW9uIDEwCiNwcmFnbWEgdHlwZXRyYWNrIGZhbHNlCgovLyBzbWFydF9jb250cmFjdHMudG9rZW5pemVfZmFybS5jb250cmFjdC5Ub2tlbml6ZUZhcm0uX19hbGdvcHlfZW50cnlwb2ludF93aXRoX2luaXQoKSAtPiB1aW50NjQ6Cm1haW46CiAgICBpbnRjYmxvY2sgMCAxCiAgICBieXRlY2Jsb2NrIDB4MTUxZjdjNzUgImlzX2luaXRpYWxpemVkIiAiZmFybV9uYW1lIiAib3duZXIiICJhc3NldF9pZCIgInRvdGFsX3Rva2Vuc19taW50ZWQiCiAgICAvLyBzbWFydF9jb250cmFjdHMvdG9rZW5pemVfZmFybS9jb250cmFjdC5weTo1CiAgICAvLyBjbGFzcyBUb2tlbml6ZUZhcm0oQVJDNENvbnRyYWN0KToKICAgIHR4biBOdW1BcHBBcmdzCiAgICBieiBtYWluX2JhcmVfcm91dGluZ0AxMgogICAgcHVzaGJ5dGVzcyAweDgyYmI0OTc5IDB4ZTQ3NzNkOWUgMHg1YmEyMmE4NCAweDIyZTRjNWEwIDB4ZmYyYmE1YzUgMHg1NWYwZDM4ZCAweDAyYmVjZTExIC8vIG1ldGhvZCAiaW5pdGlhbGl6ZV9mYXJtKHN0cmluZyx1aW50NjQpc3RyaW5nIiwgbWV0aG9kICJnZXRfZmFybV9uYW1lKClzdHJpbmciLCBtZXRob2QgImdldF9hc3NldF9pZCgpdWludDY0IiwgbWV0aG9kICJnZXRfdG90YWxfbWludGVkKCl1aW50NjQiLCBtZXRob2QgImdldF9vd25lcigpYWRkcmVzcyIsIG1ldGhvZCAidXBkYXRlX2Zhcm1fbmFtZShzdHJpbmcpc3RyaW5nIiwgbWV0aG9kICJoZWxsbyhzdHJpbmcpc3RyaW5nIgogICAgdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMAogICAgbWF0Y2ggbWFpbl9pbml0aWFsaXplX2Zhcm1fcm91dGVANSBtYWluX2dldF9mYXJtX25hbWVfcm91dGVANiBtYWluX2dldF9hc3NldF9pZF9yb3V0ZUA3IG1haW5fZ2V0X3RvdGFsX21pbnRlZF9yb3V0ZUA4IG1haW5fZ2V0X293bmVyX3JvdXRlQDkgbWFpbl91cGRhdGVfZmFybV9uYW1lX3JvdXRlQDEwIG1haW5faGVsbG9fcm91dGVAMTEKCm1haW5fYWZ0ZXJfaWZfZWxzZUAxNDoKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy90b2tlbml6ZV9mYXJtL2NvbnRyYWN0LnB5OjUKICAgIC8vIGNsYXNzIFRva2VuaXplRmFybShBUkM0Q29udHJhY3QpOgogICAgaW50Y18wIC8vIDAKICAgIHJldHVybgoKbWFpbl9oZWxsb19yb3V0ZUAxMToKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy90b2tlbml6ZV9mYXJtL2NvbnRyYWN0LnB5OjcxCiAgICAvLyBAYWJpbWV0aG9kKCkKICAgIHR4biBPbkNvbXBsZXRpb24KICAgICEKICAgIGFzc2VydCAvLyBPbkNvbXBsZXRpb24gaXMgbm90IE5vT3AKICAgIHR4biBBcHBsaWNhdGlvbklECiAgICBhc3NlcnQgLy8gY2FuIG9ubHkgY2FsbCB3aGVuIG5vdCBjcmVhdGluZwogICAgLy8gc21hcnRfY29udHJhY3RzL3Rva2VuaXplX2Zhcm0vY29udHJhY3QucHk6NQogICAgLy8gY2xhc3MgVG9rZW5pemVGYXJtKEFSQzRDb250cmFjdCk6CiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAxCiAgICBleHRyYWN0IDIgMAogICAgLy8gc21hcnRfY29udHJhY3RzL3Rva2VuaXplX2Zhcm0vY29udHJhY3QucHk6NzEKICAgIC8vIEBhYmltZXRob2QoKQogICAgY2FsbHN1YiBoZWxsbwogICAgZHVwCiAgICBsZW4KICAgIGl0b2IKICAgIGV4dHJhY3QgNiAyCiAgICBzd2FwCiAgICBjb25jYXQKICAgIGJ5dGVjXzAgLy8gMHgxNTFmN2M3NQogICAgc3dhcAogICAgY29uY2F0CiAgICBsb2cKICAgIGludGNfMSAvLyAxCiAgICByZXR1cm4KCm1haW5fdXBkYXRlX2Zhcm1fbmFtZV9yb3V0ZUAxMDoKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy90b2tlbml6ZV9mYXJtL2NvbnRyYWN0LnB5OjYyCiAgICAvLyBAYWJpbWV0aG9kKCkKICAgIHR4biBPbkNvbXBsZXRpb24KICAgICEKICAgIGFzc2VydCAvLyBPbkNvbXBsZXRpb24gaXMgbm90IE5vT3AKICAgIHR4biBBcHBsaWNhdGlvbklECiAgICBhc3NlcnQgLy8gY2FuIG9ubHkgY2FsbCB3aGVuIG5vdCBjcmVhdGluZwogICAgLy8gc21hcnRfY29udHJhY3RzL3Rva2VuaXplX2Zhcm0vY29udHJhY3QucHk6NQogICAgLy8gY2xhc3MgVG9rZW5pemVGYXJtKEFSQzRDb250cmFjdCk6CiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAxCiAgICBleHRyYWN0IDIgMAogICAgLy8gc21hcnRfY29udHJhY3RzL3Rva2VuaXplX2Zhcm0vY29udHJhY3QucHk6NjIKICAgIC8vIEBhYmltZXRob2QoKQogICAgY2FsbHN1YiB1cGRhdGVfZmFybV9uYW1lCiAgICBkdXAKICAgIGxlbgogICAgaXRvYgogICAgZXh0cmFjdCA2IDIKICAgIHN3YXAKICAgIGNvbmNhdAogICAgYnl0ZWNfMCAvLyAweDE1MWY3Yzc1CiAgICBzd2FwCiAgICBjb25jYXQKICAgIGxvZwogICAgaW50Y18xIC8vIDEKICAgIHJldHVybgoKbWFpbl9nZXRfb3duZXJfcm91dGVAOToKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy90b2tlbml6ZV9mYXJtL2NvbnRyYWN0LnB5OjU2CiAgICAvLyBAYWJpbWV0aG9kKCkKICAgIHR4biBPbkNvbXBsZXRpb24KICAgICEKICAgIGFzc2VydCAvLyBPbkNvbXBsZXRpb24gaXMgbm90IE5vT3AKICAgIHR4biBBcHBsaWNhdGlvbklECiAgICBhc3NlcnQgLy8gY2FuIG9ubHkgY2FsbCB3aGVuIG5vdCBjcmVhdGluZwogICAgY2FsbHN1YiBnZXRfb3duZXIKICAgIGJ5dGVjXzAgLy8gMHgxNTFmN2M3NQogICAgc3dhcAogICAgY29uY2F0CiAgICBsb2cKICAgIGludGNfMSAvLyAxCiAgICByZXR1cm4KCm1haW5fZ2V0X3RvdGFsX21pbnRlZF9yb3V0ZUA4OgogICAgLy8gc21hcnRfY29udHJhY3RzL3Rva2VuaXplX2Zhcm0vY29udHJhY3QucHk6NTAKICAgIC8vIEBhYmltZXRob2QoKQogICAgdHhuIE9uQ29tcGxldGlvbgogICAgIQogICAgYXNzZXJ0IC8vIE9uQ29tcGxldGlvbiBpcyBub3QgTm9PcAogICAgdHhuIEFwcGxpY2F0aW9uSUQKICAgIGFzc2VydCAvLyBjYW4gb25seSBjYWxsIHdoZW4gbm90IGNyZWF0aW5nCiAgICBjYWxsc3ViIGdldF90b3RhbF9taW50ZWQKICAgIGl0b2IKICAgIGJ5dGVjXzAgLy8gMHgxNTFmN2M3NQogICAgc3dhcAogICAgY29uY2F0CiAgICBsb2cKICAgIGludGNfMSAvLyAxCiAgICByZXR1cm4KCm1haW5fZ2V0X2Fzc2V0X2lkX3JvdXRlQDc6CiAgICAvLyBzbWFydF9jb250cmFjdHMvdG9rZW5pemVfZmFybS9jb250cmFjdC5weTo0NAogICAgLy8gQGFiaW1ldGhvZCgpCiAgICB0eG4gT25Db21wbGV0aW9uCiAgICAhCiAgICBhc3NlcnQgLy8gT25Db21wbGV0aW9uIGlzIG5vdCBOb09wCiAgICB0eG4gQXBwbGljYXRpb25JRAogICAgYXNzZXJ0IC8vIGNhbiBvbmx5IGNhbGwgd2hlbiBub3QgY3JlYXRpbmcKICAgIGNhbGxzdWIgZ2V0X2Fzc2V0X2lkCiAgICBpdG9iCiAgICBieXRlY18wIC8vIDB4MTUxZjdjNzUKICAgIHN3YXAKICAgIGNvbmNhdAogICAgbG9nCiAgICBpbnRjXzEgLy8gMQogICAgcmV0dXJuCgptYWluX2dldF9mYXJtX25hbWVfcm91dGVANjoKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy90b2tlbml6ZV9mYXJtL2NvbnRyYWN0LnB5OjM4CiAgICAvLyBAYWJpbWV0aG9kKCkKICAgIHR4biBPbkNvbXBsZXRpb24KICAgICEKICAgIGFzc2VydCAvLyBPbkNvbXBsZXRpb24gaXMgbm90IE5vT3AKICAgIHR4biBBcHBsaWNhdGlvbklECiAgICBhc3NlcnQgLy8gY2FuIG9ubHkgY2FsbCB3aGVuIG5vdCBjcmVhdGluZwogICAgY2FsbHN1YiBnZXRfZmFybV9uYW1lCiAgICBkdXAKICAgIGxlbgogICAgaXRvYgogICAgZXh0cmFjdCA2IDIKICAgIHN3YXAKICAgIGNvbmNhdAogICAgYnl0ZWNfMCAvLyAweDE1MWY3Yzc1CiAgICBzd2FwCiAgICBjb25jYXQKICAgIGxvZwogICAgaW50Y18xIC8vIDEKICAgIHJldHVybgoKbWFpbl9pbml0aWFsaXplX2Zhcm1fcm91dGVANToKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy90b2tlbml6ZV9mYXJtL2NvbnRyYWN0LnB5OjIwCiAgICAvLyBAYWJpbWV0aG9kKCkKICAgIHR4biBPbkNvbXBsZXRpb24KICAgICEKICAgIGFzc2VydCAvLyBPbkNvbXBsZXRpb24gaXMgbm90IE5vT3AKICAgIHR4biBBcHBsaWNhdGlvbklECiAgICBhc3NlcnQgLy8gY2FuIG9ubHkgY2FsbCB3aGVuIG5vdCBjcmVhdGluZwogICAgLy8gc21hcnRfY29udHJhY3RzL3Rva2VuaXplX2Zhcm0vY29udHJhY3QucHk6NQogICAgLy8gY2xhc3MgVG9rZW5pemVGYXJtKEFSQzRDb250cmFjdCk6CiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAxCiAgICBleHRyYWN0IDIgMAogICAgdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMgogICAgYnRvaQogICAgLy8gc21hcnRfY29udHJhY3RzL3Rva2VuaXplX2Zhcm0vY29udHJhY3QucHk6MjAKICAgIC8vIEBhYmltZXRob2QoKQogICAgY2FsbHN1YiBpbml0aWFsaXplX2Zhcm0KICAgIGR1cAogICAgbGVuCiAgICBpdG9iCiAgICBleHRyYWN0IDYgMgogICAgc3dhcAogICAgY29uY2F0CiAgICBieXRlY18wIC8vIDB4MTUxZjdjNzUKICAgIHN3YXAKICAgIGNvbmNhdAogICAgbG9nCiAgICBpbnRjXzEgLy8gMQogICAgcmV0dXJuCgptYWluX2JhcmVfcm91dGluZ0AxMjoKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy90b2tlbml6ZV9mYXJtL2NvbnRyYWN0LnB5OjUKICAgIC8vIGNsYXNzIFRva2VuaXplRmFybShBUkM0Q29udHJhY3QpOgogICAgdHhuIE9uQ29tcGxldGlvbgogICAgYm56IG1haW5fYWZ0ZXJfaWZfZWxzZUAxNAogICAgdHhuIEFwcGxpY2F0aW9uSUQKICAgICEKICAgIGFzc2VydCAvLyBjYW4gb25seSBjYWxsIHdoZW4gY3JlYXRpbmcKICAgIGludGNfMSAvLyAxCiAgICByZXR1cm4KCgovLyBzbWFydF9jb250cmFjdHMudG9rZW5pemVfZmFybS5jb250cmFjdC5Ub2tlbml6ZUZhcm0uaW5pdGlhbGl6ZV9mYXJtKGZhcm1fbmFtZTogYnl0ZXMsIGFzc2V0X2lkOiB1aW50NjQpIC0+IGJ5dGVzOgppbml0aWFsaXplX2Zhcm06CiAgICAvLyBzbWFydF9jb250cmFjdHMvdG9rZW5pemVfZmFybS9jb250cmFjdC5weToyMC0yNQogICAgLy8gQGFiaW1ldGhvZCgpCiAgICAvLyBkZWYgaW5pdGlhbGl6ZV9mYXJtKAogICAgLy8gICAgIHNlbGYsCiAgICAvLyAgICAgZmFybV9uYW1lOiBTdHJpbmcsCiAgICAvLyAgICAgYXNzZXRfaWQ6IFVJbnQ2NAogICAgLy8gKSAtPiBTdHJpbmc6CiAgICBwcm90byAyIDEKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy90b2tlbml6ZV9mYXJtL2NvbnRyYWN0LnB5OjI3CiAgICAvLyBhc3NlcnQgbm90IHNlbGYuaXNfaW5pdGlhbGl6ZWQudmFsdWUsICJGYXJtIGFscmVhZHkgaW5pdGlhbGl6ZWQiCiAgICBpbnRjXzAgLy8gMAogICAgYnl0ZWNfMSAvLyAiaXNfaW5pdGlhbGl6ZWQiCiAgICBhcHBfZ2xvYmFsX2dldF9leAogICAgYXNzZXJ0IC8vIGNoZWNrIHNlbGYuaXNfaW5pdGlhbGl6ZWQgZXhpc3RzCiAgICAhCiAgICBhc3NlcnQgLy8gRmFybSBhbHJlYWR5IGluaXRpYWxpemVkCiAgICAvLyBzbWFydF9jb250cmFjdHMvdG9rZW5pemVfZmFybS9jb250cmFjdC5weToyOS0zMAogICAgLy8gIyBTdG9yZSBmYXJtIGluZm9ybWF0aW9uCiAgICAvLyBzZWxmLmZhcm1fbmFtZS52YWx1ZSA9IGZhcm1fbmFtZQogICAgYnl0ZWNfMiAvLyAiZmFybV9uYW1lIgogICAgZnJhbWVfZGlnIC0yCiAgICBhcHBfZ2xvYmFsX3B1dAogICAgLy8gc21hcnRfY29udHJhY3RzL3Rva2VuaXplX2Zhcm0vY29udHJhY3QucHk6MzEKICAgIC8vIHNlbGYuYXNzZXRfaWQudmFsdWUgPSBhc3NldF9pZAogICAgYnl0ZWMgNCAvLyAiYXNzZXRfaWQiCiAgICBmcmFtZV9kaWcgLTEKICAgIGFwcF9nbG9iYWxfcHV0CiAgICAvLyBzbWFydF9jb250cmFjdHMvdG9rZW5pemVfZmFybS9jb250cmFjdC5weTozMgogICAgLy8gc2VsZi5vd25lci52YWx1ZSA9IFR4bi5zZW5kZXIKICAgIGJ5dGVjXzMgLy8gIm93bmVyIgogICAgdHhuIFNlbmRlcgogICAgYXBwX2dsb2JhbF9wdXQKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy90b2tlbml6ZV9mYXJtL2NvbnRyYWN0LnB5OjMzCiAgICAvLyBzZWxmLmlzX2luaXRpYWxpemVkLnZhbHVlID0gVHJ1ZQogICAgYnl0ZWNfMSAvLyAiaXNfaW5pdGlhbGl6ZWQiCiAgICBpbnRjXzEgLy8gMQogICAgYXBwX2dsb2JhbF9wdXQKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy90b2tlbml6ZV9mYXJtL2NvbnRyYWN0LnB5OjM0CiAgICAvLyBzZWxmLnRvdGFsX3Rva2Vuc19taW50ZWQudmFsdWUgPSBVSW50NjQoMCkKICAgIGJ5dGVjIDUgLy8gInRvdGFsX3Rva2Vuc19taW50ZWQiCiAgICBpbnRjXzAgLy8gMAogICAgYXBwX2dsb2JhbF9wdXQKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy90b2tlbml6ZV9mYXJtL2NvbnRyYWN0LnB5OjM2CiAgICAvLyByZXR1cm4gU3RyaW5nKCJGYXJtIHRva2VuaXphdGlvbiBpbml0aWFsaXplZCBzdWNjZXNzZnVsbHkiKQogICAgcHVzaGJ5dGVzICJGYXJtIHRva2VuaXphdGlvbiBpbml0aWFsaXplZCBzdWNjZXNzZnVsbHkiCiAgICByZXRzdWIKCgovLyBzbWFydF9jb250cmFjdHMudG9rZW5pemVfZmFybS5jb250cmFjdC5Ub2tlbml6ZUZhcm0uZ2V0X2Zhcm1fbmFtZSgpIC0+IGJ5dGVzOgpnZXRfZmFybV9uYW1lOgogICAgLy8gc21hcnRfY29udHJhY3RzL3Rva2VuaXplX2Zhcm0vY29udHJhY3QucHk6NDEKICAgIC8vIGFzc2VydCBzZWxmLmlzX2luaXRpYWxpemVkLnZhbHVlLCAiRmFybSBub3QgaW5pdGlhbGl6ZWQiCiAgICBpbnRjXzAgLy8gMAogICAgYnl0ZWNfMSAvLyAiaXNfaW5pdGlhbGl6ZWQiCiAgICBhcHBfZ2xvYmFsX2dldF9leAogICAgYXNzZXJ0IC8vIGNoZWNrIHNlbGYuaXNfaW5pdGlhbGl6ZWQgZXhpc3RzCiAgICBhc3NlcnQgLy8gRmFybSBub3QgaW5pdGlhbGl6ZWQKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy90b2tlbml6ZV9mYXJtL2NvbnRyYWN0LnB5OjQyCiAgICAvLyByZXR1cm4gc2VsZi5mYXJtX25hbWUudmFsdWUKICAgIGludGNfMCAvLyAwCiAgICBieXRlY18yIC8vICJmYXJtX25hbWUiCiAgICBhcHBfZ2xvYmFsX2dldF9leAogICAgYXNzZXJ0IC8vIGNoZWNrIHNlbGYuZmFybV9uYW1lIGV4aXN0cwogICAgcmV0c3ViCgoKLy8gc21hcnRfY29udHJhY3RzLnRva2VuaXplX2Zhcm0uY29udHJhY3QuVG9rZW5pemVGYXJtLmdldF9hc3NldF9pZCgpIC0+IHVpbnQ2NDoKZ2V0X2Fzc2V0X2lkOgogICAgLy8gc21hcnRfY29udHJhY3RzL3Rva2VuaXplX2Zhcm0vY29udHJhY3QucHk6NDcKICAgIC8vIGFzc2VydCBzZWxmLmlzX2luaXRpYWxpemVkLnZhbHVlLCAiRmFybSBub3QgaW5pdGlhbGl6ZWQiCiAgICBpbnRjXzAgLy8gMAogICAgYnl0ZWNfMSAvLyAiaXNfaW5pdGlhbGl6ZWQiCiAgICBhcHBfZ2xvYmFsX2dldF9leAogICAgYXNzZXJ0IC8vIGNoZWNrIHNlbGYuaXNfaW5pdGlhbGl6ZWQgZXhpc3RzCiAgICBhc3NlcnQgLy8gRmFybSBub3QgaW5pdGlhbGl6ZWQKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy90b2tlbml6ZV9mYXJtL2NvbnRyYWN0LnB5OjQ4CiAgICAvLyByZXR1cm4gc2VsZi5hc3NldF9pZC52YWx1ZQogICAgaW50Y18wIC8vIDAKICAgIGJ5dGVjIDQgLy8gImFzc2V0X2lkIgogICAgYXBwX2dsb2JhbF9nZXRfZXgKICAgIGFzc2VydCAvLyBjaGVjayBzZWxmLmFzc2V0X2lkIGV4aXN0cwogICAgcmV0c3ViCgoKLy8gc21hcnRfY29udHJhY3RzLnRva2VuaXplX2Zhcm0uY29udHJhY3QuVG9rZW5pemVGYXJtLmdldF90b3RhbF9taW50ZWQoKSAtPiB1aW50NjQ6CmdldF90b3RhbF9taW50ZWQ6CiAgICAvLyBzbWFydF9jb250cmFjdHMvdG9rZW5pemVfZmFybS9jb250cmFjdC5weTo1MwogICAgLy8gYXNzZXJ0IHNlbGYuaXNfaW5pdGlhbGl6ZWQudmFsdWUsICJGYXJtIG5vdCBpbml0aWFsaXplZCIKICAgIGludGNfMCAvLyAwCiAgICBieXRlY18xIC8vICJpc19pbml0aWFsaXplZCIKICAgIGFwcF9nbG9iYWxfZ2V0X2V4CiAgICBhc3NlcnQgLy8gY2hlY2sgc2VsZi5pc19pbml0aWFsaXplZCBleGlzdHMKICAgIGFzc2VydCAvLyBGYXJtIG5vdCBpbml0aWFsaXplZAogICAgLy8gc21hcnRfY29udHJhY3RzL3Rva2VuaXplX2Zhcm0vY29udHJhY3QucHk6NTQKICAgIC8vIHJldHVybiBzZWxmLnRvdGFsX3Rva2Vuc19taW50ZWQudmFsdWUKICAgIGludGNfMCAvLyAwCiAgICBieXRlYyA1IC8vICJ0b3RhbF90b2tlbnNfbWludGVkIgogICAgYXBwX2dsb2JhbF9nZXRfZXgKICAgIGFzc2VydCAvLyBjaGVjayBzZWxmLnRvdGFsX3Rva2Vuc19taW50ZWQgZXhpc3RzCiAgICByZXRzdWIKCgovLyBzbWFydF9jb250cmFjdHMudG9rZW5pemVfZmFybS5jb250cmFjdC5Ub2tlbml6ZUZhcm0uZ2V0X293bmVyKCkgLT4gYnl0ZXM6CmdldF9vd25lcjoKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy90b2tlbml6ZV9mYXJtL2NvbnRyYWN0LnB5OjU5CiAgICAvLyBhc3NlcnQgc2VsZi5pc19pbml0aWFsaXplZC52YWx1ZSwgIkZhcm0gbm90IGluaXRpYWxpemVkIgogICAgaW50Y18wIC8vIDAKICAgIGJ5dGVjXzEgLy8gImlzX2luaXRpYWxpemVkIgogICAgYXBwX2dsb2JhbF9nZXRfZXgKICAgIGFzc2VydCAvLyBjaGVjayBzZWxmLmlzX2luaXRpYWxpemVkIGV4aXN0cwogICAgYXNzZXJ0IC8vIEZhcm0gbm90IGluaXRpYWxpemVkCiAgICAvLyBzbWFydF9jb250cmFjdHMvdG9rZW5pemVfZmFybS9jb250cmFjdC5weTo2MAogICAgLy8gcmV0dXJuIHNlbGYub3duZXIudmFsdWUKICAgIGludGNfMCAvLyAwCiAgICBieXRlY18zIC8vICJvd25lciIKICAgIGFwcF9nbG9iYWxfZ2V0X2V4CiAgICBhc3NlcnQgLy8gY2hlY2sgc2VsZi5vd25lciBleGlzdHMKICAgIHJldHN1YgoKCi8vIHNtYXJ0X2NvbnRyYWN0cy50b2tlbml6ZV9mYXJtLmNvbnRyYWN0LlRva2VuaXplRmFybS51cGRhdGVfZmFybV9uYW1lKG5ld19mYXJtX25hbWU6IGJ5dGVzKSAtPiBieXRlczoKdXBkYXRlX2Zhcm1fbmFtZToKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy90b2tlbml6ZV9mYXJtL2NvbnRyYWN0LnB5OjYyLTYzCiAgICAvLyBAYWJpbWV0aG9kKCkKICAgIC8vIGRlZiB1cGRhdGVfZmFybV9uYW1lKHNlbGYsIG5ld19mYXJtX25hbWU6IFN0cmluZykgLT4gU3RyaW5nOgogICAgcHJvdG8gMSAxCiAgICAvLyBzbWFydF9jb250cmFjdHMvdG9rZW5pemVfZmFybS9jb250cmFjdC5weTo2NQogICAgLy8gYXNzZXJ0IHNlbGYuaXNfaW5pdGlhbGl6ZWQudmFsdWUsICJGYXJtIG5vdCBpbml0aWFsaXplZCIKICAgIGludGNfMCAvLyAwCiAgICBieXRlY18xIC8vICJpc19pbml0aWFsaXplZCIKICAgIGFwcF9nbG9iYWxfZ2V0X2V4CiAgICBhc3NlcnQgLy8gY2hlY2sgc2VsZi5pc19pbml0aWFsaXplZCBleGlzdHMKICAgIGFzc2VydCAvLyBGYXJtIG5vdCBpbml0aWFsaXplZAogICAgLy8gc21hcnRfY29udHJhY3RzL3Rva2VuaXplX2Zhcm0vY29udHJhY3QucHk6NjYKICAgIC8vIGFzc2VydCBUeG4uc2VuZGVyID09IHNlbGYub3duZXIudmFsdWUsICJPbmx5IG93bmVyIGNhbiB1cGRhdGUgZmFybSBuYW1lIgogICAgdHhuIFNlbmRlcgogICAgaW50Y18wIC8vIDAKICAgIGJ5dGVjXzMgLy8gIm93bmVyIgogICAgYXBwX2dsb2JhbF9nZXRfZXgKICAgIGFzc2VydCAvLyBjaGVjayBzZWxmLm93bmVyIGV4aXN0cwogICAgPT0KICAgIGFzc2VydCAvLyBPbmx5IG93bmVyIGNhbiB1cGRhdGUgZmFybSBuYW1lCiAgICAvLyBzbWFydF9jb250cmFjdHMvdG9rZW5pemVfZmFybS9jb250cmFjdC5weTo2OAogICAgLy8gc2VsZi5mYXJtX25hbWUudmFsdWUgPSBuZXdfZmFybV9uYW1lCiAgICBieXRlY18yIC8vICJmYXJtX25hbWUiCiAgICBmcmFtZV9kaWcgLTEKICAgIGFwcF9nbG9iYWxfcHV0CiAgICAvLyBzbWFydF9jb250cmFjdHMvdG9rZW5pemVfZmFybS9jb250cmFjdC5weTo2OQogICAgLy8gcmV0dXJuIFN0cmluZygiRmFybSBuYW1lIHVwZGF0ZWQgc3VjY2Vzc2Z1bGx5IikKICAgIHB1c2hieXRlcyAiRmFybSBuYW1lIHVwZGF0ZWQgc3VjY2Vzc2Z1bGx5IgogICAgcmV0c3ViCgoKLy8gc21hcnRfY29udHJhY3RzLnRva2VuaXplX2Zhcm0uY29udHJhY3QuVG9rZW5pemVGYXJtLmhlbGxvKG5hbWU6IGJ5dGVzKSAtPiBieXRlczoKaGVsbG86CiAgICAvLyBzbWFydF9jb250cmFjdHMvdG9rZW5pemVfZmFybS9jb250cmFjdC5weTo3MS03MgogICAgLy8gQGFiaW1ldGhvZCgpCiAgICAvLyBkZWYgaGVsbG8oc2VsZiwgbmFtZTogU3RyaW5nKSAtPiBTdHJpbmc6CiAgICBwcm90byAxIDEKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy90b2tlbml6ZV9mYXJtL2NvbnRyYWN0LnB5Ojc0CiAgICAvLyByZXR1cm4gU3RyaW5nKCJIZWxsbywgIikgKyBuYW1lCiAgICBwdXNoYnl0ZXMgIkhlbGxvLCAiCiAgICBmcmFtZV9kaWcgLTEKICAgIGNvbmNhdAogICAgcmV0c3ViCg==", "clear": "I3ByYWdtYSB2ZXJzaW9uIDEwCiNwcmFnbWEgdHlwZXRyYWNrIGZhbHNlCgovLyBhbGdvcHkuYXJjNC5BUkM0Q29udHJhY3QuY2xlYXJfc3RhdGVfcHJvZ3JhbSgpIC0+IHVpbnQ2NDoKbWFpbjoKICAgIHB1c2hpbnQgMSAvLyAxCiAgICByZXR1cm4K"}, "sourceInfo": {"approval": {"pcOffsetMethod": "none", "sourceInfo": [{"pc": [322], "errorMessage": "Farm already initialized"}, {"pc": [392, 402, 413, 424, 437], "errorMessage": "Farm not initialized"}, {"pc": [138, 168, 198, 214, 231, 248, 272], "errorMessage": "OnCompletion is not NoOp"}, {"pc": [445], "errorMessage": "Only owner can update farm name"}, {"pc": [311], "errorMessage": "can only call when creating"}, {"pc": [141, 171, 201, 217, 234, 251, 275], "errorMessage": "can only call when not creating"}, {"pc": [407], "errorMessage": "check self.asset_id exists"}, {"pc": [396], "errorMessage": "check self.farm_name exists"}, {"pc": [320, 391, 401, 412, 423, 436], "errorMessage": "check self.is_initialized exists"}, {"pc": [428, 443], "errorMessage": "check self.owner exists"}, {"pc": [418], "errorMessage": "check self.total_tokens_minted exists"}]}, "clear": {"pcOffsetMethod": "none", "sourceInfo": []}}, "templateVariables": {}}"""
 APP_SPEC = algokit_utils.Arc56Contract.from_json(_APP_SPEC_JSON)
 
 def _parse_abi_args(args: object | None = None) -> list[object] | None:
@@ -65,6 +65,25 @@ def _init_dataclass(cls: type, data: dict) -> object:
     return cls(**field_values)
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
+class InitializeFarmArgs:
+    """Dataclass for initialize_farm arguments"""
+    farm_name: str
+    asset_id: int
+
+    @property
+    def abi_method_signature(self) -> str:
+        return "initialize_farm(string,uint64)string"
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class UpdateFarmNameArgs:
+    """Dataclass for update_farm_name arguments"""
+    new_farm_name: str
+
+    @property
+    def abi_method_signature(self) -> str:
+        return "update_farm_name(string)string"
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
 class HelloArgs:
     """Dataclass for hello arguments"""
     name: str
@@ -77,6 +96,76 @@ class HelloArgs:
 class TokenizeFarmParams:
     def __init__(self, app_client: algokit_utils.AppClient):
         self.app_client = app_client
+
+    def initialize_farm(
+        self,
+        args: tuple[str, int] | InitializeFarmArgs,
+        params: algokit_utils.CommonAppCallParams | None = None
+    ) -> algokit_utils.AppCallMethodCallParams:
+        method_args = _parse_abi_args(args)
+        params = params or algokit_utils.CommonAppCallParams()
+        return self.app_client.params.call(algokit_utils.AppClientMethodCallParams(**{
+            **dataclasses.asdict(params),
+            "method": "initialize_farm(string,uint64)string",
+            "args": method_args,
+        }))
+
+    def get_farm_name(
+        self,
+        params: algokit_utils.CommonAppCallParams | None = None
+    ) -> algokit_utils.AppCallMethodCallParams:
+    
+        params = params or algokit_utils.CommonAppCallParams()
+        return self.app_client.params.call(algokit_utils.AppClientMethodCallParams(**{
+            **dataclasses.asdict(params),
+            "method": "get_farm_name()string",
+        }))
+
+    def get_asset_id(
+        self,
+        params: algokit_utils.CommonAppCallParams | None = None
+    ) -> algokit_utils.AppCallMethodCallParams:
+    
+        params = params or algokit_utils.CommonAppCallParams()
+        return self.app_client.params.call(algokit_utils.AppClientMethodCallParams(**{
+            **dataclasses.asdict(params),
+            "method": "get_asset_id()uint64",
+        }))
+
+    def get_total_minted(
+        self,
+        params: algokit_utils.CommonAppCallParams | None = None
+    ) -> algokit_utils.AppCallMethodCallParams:
+    
+        params = params or algokit_utils.CommonAppCallParams()
+        return self.app_client.params.call(algokit_utils.AppClientMethodCallParams(**{
+            **dataclasses.asdict(params),
+            "method": "get_total_minted()uint64",
+        }))
+
+    def get_owner(
+        self,
+        params: algokit_utils.CommonAppCallParams | None = None
+    ) -> algokit_utils.AppCallMethodCallParams:
+    
+        params = params or algokit_utils.CommonAppCallParams()
+        return self.app_client.params.call(algokit_utils.AppClientMethodCallParams(**{
+            **dataclasses.asdict(params),
+            "method": "get_owner()address",
+        }))
+
+    def update_farm_name(
+        self,
+        args: tuple[str] | UpdateFarmNameArgs,
+        params: algokit_utils.CommonAppCallParams | None = None
+    ) -> algokit_utils.AppCallMethodCallParams:
+        method_args = _parse_abi_args(args)
+        params = params or algokit_utils.CommonAppCallParams()
+        return self.app_client.params.call(algokit_utils.AppClientMethodCallParams(**{
+            **dataclasses.asdict(params),
+            "method": "update_farm_name(string)string",
+            "args": method_args,
+        }))
 
     def hello(
         self,
@@ -106,6 +195,76 @@ class TokenizeFarmCreateTransactionParams:
     def __init__(self, app_client: algokit_utils.AppClient):
         self.app_client = app_client
 
+    def initialize_farm(
+        self,
+        args: tuple[str, int] | InitializeFarmArgs,
+        params: algokit_utils.CommonAppCallParams | None = None
+    ) -> algokit_utils.BuiltTransactions:
+        method_args = _parse_abi_args(args)
+        params = params or algokit_utils.CommonAppCallParams()
+        return self.app_client.create_transaction.call(algokit_utils.AppClientMethodCallParams(**{
+            **dataclasses.asdict(params),
+            "method": "initialize_farm(string,uint64)string",
+            "args": method_args,
+        }))
+
+    def get_farm_name(
+        self,
+        params: algokit_utils.CommonAppCallParams | None = None
+    ) -> algokit_utils.BuiltTransactions:
+    
+        params = params or algokit_utils.CommonAppCallParams()
+        return self.app_client.create_transaction.call(algokit_utils.AppClientMethodCallParams(**{
+            **dataclasses.asdict(params),
+            "method": "get_farm_name()string",
+        }))
+
+    def get_asset_id(
+        self,
+        params: algokit_utils.CommonAppCallParams | None = None
+    ) -> algokit_utils.BuiltTransactions:
+    
+        params = params or algokit_utils.CommonAppCallParams()
+        return self.app_client.create_transaction.call(algokit_utils.AppClientMethodCallParams(**{
+            **dataclasses.asdict(params),
+            "method": "get_asset_id()uint64",
+        }))
+
+    def get_total_minted(
+        self,
+        params: algokit_utils.CommonAppCallParams | None = None
+    ) -> algokit_utils.BuiltTransactions:
+    
+        params = params or algokit_utils.CommonAppCallParams()
+        return self.app_client.create_transaction.call(algokit_utils.AppClientMethodCallParams(**{
+            **dataclasses.asdict(params),
+            "method": "get_total_minted()uint64",
+        }))
+
+    def get_owner(
+        self,
+        params: algokit_utils.CommonAppCallParams | None = None
+    ) -> algokit_utils.BuiltTransactions:
+    
+        params = params or algokit_utils.CommonAppCallParams()
+        return self.app_client.create_transaction.call(algokit_utils.AppClientMethodCallParams(**{
+            **dataclasses.asdict(params),
+            "method": "get_owner()address",
+        }))
+
+    def update_farm_name(
+        self,
+        args: tuple[str] | UpdateFarmNameArgs,
+        params: algokit_utils.CommonAppCallParams | None = None
+    ) -> algokit_utils.BuiltTransactions:
+        method_args = _parse_abi_args(args)
+        params = params or algokit_utils.CommonAppCallParams()
+        return self.app_client.create_transaction.call(algokit_utils.AppClientMethodCallParams(**{
+            **dataclasses.asdict(params),
+            "method": "update_farm_name(string)string",
+            "args": method_args,
+        }))
+
     def hello(
         self,
         args: tuple[str] | HelloArgs,
@@ -134,6 +293,94 @@ class TokenizeFarmSend:
     def __init__(self, app_client: algokit_utils.AppClient):
         self.app_client = app_client
 
+    def initialize_farm(
+        self,
+        args: tuple[str, int] | InitializeFarmArgs,
+        params: algokit_utils.CommonAppCallParams | None = None,
+        send_params: algokit_utils.SendParams | None = None
+    ) -> algokit_utils.SendAppTransactionResult[str]:
+        method_args = _parse_abi_args(args)
+        params = params or algokit_utils.CommonAppCallParams()
+        response = self.app_client.send.call(algokit_utils.AppClientMethodCallParams(**{
+            **dataclasses.asdict(params),
+            "method": "initialize_farm(string,uint64)string",
+            "args": method_args,
+        }), send_params=send_params)
+        parsed_response = response
+        return typing.cast(algokit_utils.SendAppTransactionResult[str], parsed_response)
+
+    def get_farm_name(
+        self,
+        params: algokit_utils.CommonAppCallParams | None = None,
+        send_params: algokit_utils.SendParams | None = None
+    ) -> algokit_utils.SendAppTransactionResult[str]:
+    
+        params = params or algokit_utils.CommonAppCallParams()
+        response = self.app_client.send.call(algokit_utils.AppClientMethodCallParams(**{
+            **dataclasses.asdict(params),
+            "method": "get_farm_name()string",
+        }), send_params=send_params)
+        parsed_response = response
+        return typing.cast(algokit_utils.SendAppTransactionResult[str], parsed_response)
+
+    def get_asset_id(
+        self,
+        params: algokit_utils.CommonAppCallParams | None = None,
+        send_params: algokit_utils.SendParams | None = None
+    ) -> algokit_utils.SendAppTransactionResult[int]:
+    
+        params = params or algokit_utils.CommonAppCallParams()
+        response = self.app_client.send.call(algokit_utils.AppClientMethodCallParams(**{
+            **dataclasses.asdict(params),
+            "method": "get_asset_id()uint64",
+        }), send_params=send_params)
+        parsed_response = response
+        return typing.cast(algokit_utils.SendAppTransactionResult[int], parsed_response)
+
+    def get_total_minted(
+        self,
+        params: algokit_utils.CommonAppCallParams | None = None,
+        send_params: algokit_utils.SendParams | None = None
+    ) -> algokit_utils.SendAppTransactionResult[int]:
+    
+        params = params or algokit_utils.CommonAppCallParams()
+        response = self.app_client.send.call(algokit_utils.AppClientMethodCallParams(**{
+            **dataclasses.asdict(params),
+            "method": "get_total_minted()uint64",
+        }), send_params=send_params)
+        parsed_response = response
+        return typing.cast(algokit_utils.SendAppTransactionResult[int], parsed_response)
+
+    def get_owner(
+        self,
+        params: algokit_utils.CommonAppCallParams | None = None,
+        send_params: algokit_utils.SendParams | None = None
+    ) -> algokit_utils.SendAppTransactionResult[str]:
+    
+        params = params or algokit_utils.CommonAppCallParams()
+        response = self.app_client.send.call(algokit_utils.AppClientMethodCallParams(**{
+            **dataclasses.asdict(params),
+            "method": "get_owner()address",
+        }), send_params=send_params)
+        parsed_response = response
+        return typing.cast(algokit_utils.SendAppTransactionResult[str], parsed_response)
+
+    def update_farm_name(
+        self,
+        args: tuple[str] | UpdateFarmNameArgs,
+        params: algokit_utils.CommonAppCallParams | None = None,
+        send_params: algokit_utils.SendParams | None = None
+    ) -> algokit_utils.SendAppTransactionResult[str]:
+        method_args = _parse_abi_args(args)
+        params = params or algokit_utils.CommonAppCallParams()
+        response = self.app_client.send.call(algokit_utils.AppClientMethodCallParams(**{
+            **dataclasses.asdict(params),
+            "method": "update_farm_name(string)string",
+            "args": method_args,
+        }), send_params=send_params)
+        parsed_response = response
+        return typing.cast(algokit_utils.SendAppTransactionResult[str], parsed_response)
+
     def hello(
         self,
         args: tuple[str] | HelloArgs,
@@ -161,11 +408,89 @@ class TokenizeFarmSend:
         )
 
 
+class GlobalStateValue(typing.TypedDict):
+    """Shape of global_state state key values"""
+    farm_name: str
+    asset_id: int
+    total_tokens_minted: int
+    is_initialized: int
+    owner: str
+
 class TokenizeFarmState:
     """Methods to access state for the current TokenizeFarm app"""
 
     def __init__(self, app_client: algokit_utils.AppClient):
         self.app_client = app_client
+
+    @property
+    def global_state(
+        self
+    ) -> "_GlobalState":
+            """Methods to access global_state for the current app"""
+            return _GlobalState(self.app_client)
+
+class _GlobalState:
+    def __init__(self, app_client: algokit_utils.AppClient):
+        self.app_client = app_client
+        
+        # Pre-generated mapping of value types to their struct classes
+        self._struct_classes: dict[str, typing.Type[typing.Any]] = {}
+
+    def get_all(self) -> GlobalStateValue:
+        """Get all current keyed values from global_state state"""
+        result = self.app_client.state.global_state.get_all()
+        if not result:
+            return typing.cast(GlobalStateValue, {})
+
+        converted = {}
+        for key, value in result.items():
+            key_info = self.app_client.app_spec.state.keys.global_state.get(key)
+            struct_class = self._struct_classes.get(key_info.value_type) if key_info else None
+            converted[key] = (
+                _init_dataclass(struct_class, value) if struct_class and isinstance(value, dict)
+                else value
+            )
+        return typing.cast(GlobalStateValue, converted)
+
+    @property
+    def farm_name(self) -> str:
+        """Get the current value of the farm_name key in global_state state"""
+        value = self.app_client.state.global_state.get_value("farm_name")
+        if isinstance(value, dict) and "AVMString" in self._struct_classes:
+            return _init_dataclass(self._struct_classes["AVMString"], value)  # type: ignore
+        return typing.cast(str, value)
+
+    @property
+    def asset_id(self) -> int:
+        """Get the current value of the asset_id key in global_state state"""
+        value = self.app_client.state.global_state.get_value("asset_id")
+        if isinstance(value, dict) and "AVMUint64" in self._struct_classes:
+            return _init_dataclass(self._struct_classes["AVMUint64"], value)  # type: ignore
+        return typing.cast(int, value)
+
+    @property
+    def total_tokens_minted(self) -> int:
+        """Get the current value of the total_tokens_minted key in global_state state"""
+        value = self.app_client.state.global_state.get_value("total_tokens_minted")
+        if isinstance(value, dict) and "AVMUint64" in self._struct_classes:
+            return _init_dataclass(self._struct_classes["AVMUint64"], value)  # type: ignore
+        return typing.cast(int, value)
+
+    @property
+    def is_initialized(self) -> int:
+        """Get the current value of the is_initialized key in global_state state"""
+        value = self.app_client.state.global_state.get_value("is_initialized")
+        if isinstance(value, dict) and "AVMUint64" in self._struct_classes:
+            return _init_dataclass(self._struct_classes["AVMUint64"], value)  # type: ignore
+        return typing.cast(int, value)
+
+    @property
+    def owner(self) -> str:
+        """Get the current value of the owner key in global_state state"""
+        value = self.app_client.state.global_state.get_value("owner")
+        if isinstance(value, dict) and "address" in self._struct_classes:
+            return _init_dataclass(self._struct_classes["address"], value)  # type: ignore
+        return typing.cast(str, value)
 
 class TokenizeFarmClient:
     """Client for interacting with TokenizeFarm smart contract"""
@@ -313,6 +638,42 @@ class TokenizeFarmClient:
     @typing.overload
     def decode_return_value(
         self,
+        method: typing.Literal["initialize_farm(string,uint64)string"],
+        return_value: algokit_utils.ABIReturn | None
+    ) -> str | None: ...
+    @typing.overload
+    def decode_return_value(
+        self,
+        method: typing.Literal["get_farm_name()string"],
+        return_value: algokit_utils.ABIReturn | None
+    ) -> str | None: ...
+    @typing.overload
+    def decode_return_value(
+        self,
+        method: typing.Literal["get_asset_id()uint64"],
+        return_value: algokit_utils.ABIReturn | None
+    ) -> int | None: ...
+    @typing.overload
+    def decode_return_value(
+        self,
+        method: typing.Literal["get_total_minted()uint64"],
+        return_value: algokit_utils.ABIReturn | None
+    ) -> int | None: ...
+    @typing.overload
+    def decode_return_value(
+        self,
+        method: typing.Literal["get_owner()address"],
+        return_value: algokit_utils.ABIReturn | None
+    ) -> str | None: ...
+    @typing.overload
+    def decode_return_value(
+        self,
+        method: typing.Literal["update_farm_name(string)string"],
+        return_value: algokit_utils.ABIReturn | None
+    ) -> str | None: ...
+    @typing.overload
+    def decode_return_value(
+        self,
         method: typing.Literal["hello(string)string"],
         return_value: algokit_utils.ABIReturn | None
     ) -> str | None: ...
@@ -327,7 +688,7 @@ class TokenizeFarmClient:
         self,
         method: str,
         return_value: algokit_utils.ABIReturn | None
-    ) -> algokit_utils.ABIValue | algokit_utils.ABIStruct | None | str:
+    ) -> algokit_utils.ABIValue | algokit_utils.ABIStruct | None | int | str:
         """Decode ABI return value for the given method."""
         if return_value is None:
             return None
@@ -498,6 +859,122 @@ class TokenizeFarmFactoryCreateParams:
             algokit_utils.AppFactoryCreateParams(**dataclasses.asdict(params)),
             compilation_params=compilation_params)
 
+    def initialize_farm(
+        self,
+        args: tuple[str, int] | InitializeFarmArgs,
+        *,
+        params: algokit_utils.CommonAppCallCreateParams | None = None,
+        compilation_params: algokit_utils.AppClientCompilationParams | None = None
+    ) -> algokit_utils.AppCreateMethodCallParams:
+        """Creates a new instance using the initialize_farm(string,uint64)string ABI method"""
+        params = params or algokit_utils.CommonAppCallCreateParams()
+        return self.app_factory.params.create(
+            algokit_utils.AppFactoryCreateMethodCallParams(
+                **{
+                **dataclasses.asdict(params),
+                "method": "initialize_farm(string,uint64)string",
+                "args": _parse_abi_args(args),
+                }
+            ),
+            compilation_params=compilation_params
+        )
+
+    def get_farm_name(
+        self,
+        *,
+        params: algokit_utils.CommonAppCallCreateParams | None = None,
+        compilation_params: algokit_utils.AppClientCompilationParams | None = None
+    ) -> algokit_utils.AppCreateMethodCallParams:
+        """Creates a new instance using the get_farm_name()string ABI method"""
+        params = params or algokit_utils.CommonAppCallCreateParams()
+        return self.app_factory.params.create(
+            algokit_utils.AppFactoryCreateMethodCallParams(
+                **{
+                **dataclasses.asdict(params),
+                "method": "get_farm_name()string",
+                "args": None,
+                }
+            ),
+            compilation_params=compilation_params
+        )
+
+    def get_asset_id(
+        self,
+        *,
+        params: algokit_utils.CommonAppCallCreateParams | None = None,
+        compilation_params: algokit_utils.AppClientCompilationParams | None = None
+    ) -> algokit_utils.AppCreateMethodCallParams:
+        """Creates a new instance using the get_asset_id()uint64 ABI method"""
+        params = params or algokit_utils.CommonAppCallCreateParams()
+        return self.app_factory.params.create(
+            algokit_utils.AppFactoryCreateMethodCallParams(
+                **{
+                **dataclasses.asdict(params),
+                "method": "get_asset_id()uint64",
+                "args": None,
+                }
+            ),
+            compilation_params=compilation_params
+        )
+
+    def get_total_minted(
+        self,
+        *,
+        params: algokit_utils.CommonAppCallCreateParams | None = None,
+        compilation_params: algokit_utils.AppClientCompilationParams | None = None
+    ) -> algokit_utils.AppCreateMethodCallParams:
+        """Creates a new instance using the get_total_minted()uint64 ABI method"""
+        params = params or algokit_utils.CommonAppCallCreateParams()
+        return self.app_factory.params.create(
+            algokit_utils.AppFactoryCreateMethodCallParams(
+                **{
+                **dataclasses.asdict(params),
+                "method": "get_total_minted()uint64",
+                "args": None,
+                }
+            ),
+            compilation_params=compilation_params
+        )
+
+    def get_owner(
+        self,
+        *,
+        params: algokit_utils.CommonAppCallCreateParams | None = None,
+        compilation_params: algokit_utils.AppClientCompilationParams | None = None
+    ) -> algokit_utils.AppCreateMethodCallParams:
+        """Creates a new instance using the get_owner()address ABI method"""
+        params = params or algokit_utils.CommonAppCallCreateParams()
+        return self.app_factory.params.create(
+            algokit_utils.AppFactoryCreateMethodCallParams(
+                **{
+                **dataclasses.asdict(params),
+                "method": "get_owner()address",
+                "args": None,
+                }
+            ),
+            compilation_params=compilation_params
+        )
+
+    def update_farm_name(
+        self,
+        args: tuple[str] | UpdateFarmNameArgs,
+        *,
+        params: algokit_utils.CommonAppCallCreateParams | None = None,
+        compilation_params: algokit_utils.AppClientCompilationParams | None = None
+    ) -> algokit_utils.AppCreateMethodCallParams:
+        """Creates a new instance using the update_farm_name(string)string ABI method"""
+        params = params or algokit_utils.CommonAppCallCreateParams()
+        return self.app_factory.params.create(
+            algokit_utils.AppFactoryCreateMethodCallParams(
+                **{
+                **dataclasses.asdict(params),
+                "method": "update_farm_name(string)string",
+                "args": _parse_abi_args(args),
+                }
+            ),
+            compilation_params=compilation_params
+        )
+
     def hello(
         self,
         args: tuple[str] | HelloArgs,
@@ -618,6 +1095,110 @@ class TokenizeFarmComposer:
         self.client = client
         self._composer = client.algorand.new_group()
         self._result_mappers: list[typing.Callable[[algokit_utils.ABIReturn | None], object] | None] = []
+
+    def initialize_farm(
+        self,
+        args: tuple[str, int] | InitializeFarmArgs,
+        params: algokit_utils.CommonAppCallParams | None = None
+    ) -> "TokenizeFarmComposer":
+        self._composer.add_app_call_method_call(
+            self.client.params.initialize_farm(
+                args=args,
+                params=params,
+            )
+        )
+        self._result_mappers.append(
+            lambda v: self.client.decode_return_value(
+                "initialize_farm(string,uint64)string", v
+            )
+        )
+        return self
+
+    def get_farm_name(
+        self,
+        params: algokit_utils.CommonAppCallParams | None = None
+    ) -> "TokenizeFarmComposer":
+        self._composer.add_app_call_method_call(
+            self.client.params.get_farm_name(
+                
+                params=params,
+            )
+        )
+        self._result_mappers.append(
+            lambda v: self.client.decode_return_value(
+                "get_farm_name()string", v
+            )
+        )
+        return self
+
+    def get_asset_id(
+        self,
+        params: algokit_utils.CommonAppCallParams | None = None
+    ) -> "TokenizeFarmComposer":
+        self._composer.add_app_call_method_call(
+            self.client.params.get_asset_id(
+                
+                params=params,
+            )
+        )
+        self._result_mappers.append(
+            lambda v: self.client.decode_return_value(
+                "get_asset_id()uint64", v
+            )
+        )
+        return self
+
+    def get_total_minted(
+        self,
+        params: algokit_utils.CommonAppCallParams | None = None
+    ) -> "TokenizeFarmComposer":
+        self._composer.add_app_call_method_call(
+            self.client.params.get_total_minted(
+                
+                params=params,
+            )
+        )
+        self._result_mappers.append(
+            lambda v: self.client.decode_return_value(
+                "get_total_minted()uint64", v
+            )
+        )
+        return self
+
+    def get_owner(
+        self,
+        params: algokit_utils.CommonAppCallParams | None = None
+    ) -> "TokenizeFarmComposer":
+        self._composer.add_app_call_method_call(
+            self.client.params.get_owner(
+                
+                params=params,
+            )
+        )
+        self._result_mappers.append(
+            lambda v: self.client.decode_return_value(
+                "get_owner()address", v
+            )
+        )
+        return self
+
+    def update_farm_name(
+        self,
+        args: tuple[str] | UpdateFarmNameArgs,
+        params: algokit_utils.CommonAppCallParams | None = None
+    ) -> "TokenizeFarmComposer":
+        self._composer.add_app_call_method_call(
+            self.client.params.update_farm_name(
+                args=args,
+                params=params,
+            )
+        )
+        self._result_mappers.append(
+            lambda v: self.client.decode_return_value(
+                "update_farm_name(string)string", v
+            )
+        )
+        return self
 
     def hello(
         self,
