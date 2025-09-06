@@ -11,6 +11,10 @@ import { useToast } from "@/hooks/use-toast";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [walletAddress, setWalletAddress] = useState("");
   const [role, setRole] = useState<'farmer' | 'investor'>('investor');
   const [isLogin, setIsLogin] = useState(true);
   
@@ -29,19 +33,28 @@ export default function Login() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Demo authentication - just create a user
+    if (!isLogin && password !== confirmPassword) {
+      toast({
+        title: 'Passwords do not match',
+        description: 'Please ensure the two passwords are the same before continuing.',
+      });
+      return;
+    }
+
+    // Demo authentication / simple user creation
     const newUser = {
       id: role === 'farmer' ? 'farmer-demo' : 'investor-demo',
-      name: role === 'farmer' ? 'Demo Farmer' : 'Demo Investor',
+      name: isLogin ? (role === 'farmer' ? 'Demo Farmer' : 'Demo Investor') : `${firstName} ${lastName}`,
       email,
       role,
-      connectedWallet: false
+      connectedWallet: false,
+      walletAddress: !isLogin ? walletAddress : undefined
     };
 
     setUser(newUser);
     
     toast({
-      title: `Logged in as ${role}`,
+      title: isLogin ? `Logged in as ${role}` : 'Account created',
       description: `Welcome to AgriToken, ${newUser.name}!`,
     });
 
@@ -79,6 +92,17 @@ export default function Login() {
     navigate(`/${demoRole}`);
   };
 
+  const isLoginValid = email.length > 0 && password.length > 0;
+  const isSignupValid = (
+    email.length > 0 &&
+    password.length > 0 &&
+    confirmPassword.length > 0 &&
+    password === confirmPassword &&
+    firstName.length > 0 &&
+    lastName.length > 0 &&
+    walletAddress.length > 0
+  );
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-subtle p-4">
       <Card className="w-full max-w-md shadow-large">
@@ -90,18 +114,20 @@ export default function Login() {
         </CardHeader>
         <CardContent className="space-y-4">
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="role">I am a</Label>
-              <Select value={role} onValueChange={(value: 'farmer' | 'investor') => setRole(value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="farmer">Farmer</SelectItem>
-                  <SelectItem value="investor">Investor</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label htmlFor="role">I am a</Label>
+                <Select value={role} onValueChange={(value: 'farmer' | 'investor') => setRole(value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="farmer">Farmer</SelectItem>
+                    <SelectItem value="investor">Investor</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -115,6 +141,46 @@ export default function Login() {
               />
             </div>
 
+            {!isLogin && (
+              <>
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First name</Label>
+                <Input
+                  id="firstName"
+                  type="text"
+                  placeholder="Enter your first name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last name</Label>
+                <Input
+                  id="lastName"
+                  type="text"
+                  placeholder="Enter your last name"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="wallet">Pera wallet public address</Label>
+                <Input
+                  id="wallet"
+                  type="text"
+                  placeholder="Enter your Pera wallet address"
+                  value={walletAddress}
+                  onChange={(e) => setWalletAddress(e.target.value)}
+                  required
+                />
+              </div>
+              </>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
@@ -127,7 +193,24 @@ export default function Login() {
               />
             </div>
 
-            <Button type="submit" className="w-full" variant="hero">
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm password</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="Re-enter your password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
+                {confirmPassword.length > 0 && password !== confirmPassword && (
+                  <div className="text-red-500 text-sm">Passwords do not match</div>
+                )}
+              </div>
+            )}
+
+            <Button type="submit" className="w-full" variant="hero" disabled={isLogin ? !isLoginValid : !isSignupValid}>
               {isLogin ? 'Sign In' : 'Sign Up'}
             </Button>
           </form>
