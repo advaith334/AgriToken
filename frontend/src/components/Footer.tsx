@@ -30,10 +30,6 @@ export function Footer() {
               <span>Carbon neutral</span>
             </div>
           </div>
-
-          <div className="text-xs text-muted-foreground">
-            Demo only • Built for Algorand Hackathon
-          </div>
         </div>
       </div>
     </footer>
