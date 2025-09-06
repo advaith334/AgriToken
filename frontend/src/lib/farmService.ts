@@ -18,12 +18,14 @@ export interface FarmData {
   "Expected Yield /unit": number;
   "Harvest Date": string;
   "Payout Method": string;
-  "Insurance Enabled": boolean;
-  "Insurance Type": string;
   "Verification Method": string;
   "Farm Images": string[];
   "Historical Yield": number[];
   "Local Currency": string;
+  // Blockchain fields (optional, added after tokenization)
+  "Asset ID"?: number;
+  "Contract Address"?: string;
+  "Transaction ID"?: string;
 }
 
 // Save farm data to backend API (simulated for now)

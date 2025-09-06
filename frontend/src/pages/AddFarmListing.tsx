@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Save, Upload } from "lucide-react";
 import { saveFarmData, validatePeraWalletAddress, validateEmail, generateTokenUnit, FarmData } from "@/lib/farmService";
+import { algorandService, AlgorandService } from "@/lib/algorandService";
 
 // Using FarmData interface from farmService
 
@@ -16,6 +17,8 @@ export default function AddFarmListing() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isWalletConnected, setIsWalletConnected] = useState(false);
+  const [walletPrivateKey, setWalletPrivateKey] = useState<Uint8Array | null>(null);
 
   // Form state
   const [formData, setFormData] = useState<Partial<FarmData>>({
@@ -85,6 +88,33 @@ export default function AddFarmListing() {
     }));
   };
 
+  const connectWallet = async () => {
+    try {
+      // For demo purposes, we'll generate a test account
+      // In a real implementation, you would connect to Pera Wallet or other wallet providers
+      const testAccount = AlgorandService.generateAccount();
+      
+      setWalletPrivateKey(testAccount.privateKey);
+      setFormData(prev => ({
+        ...prev,
+        "Wallet Address": testAccount.address
+      }));
+      setIsWalletConnected(true);
+      
+      toast({
+        title: "Wallet Connected",
+        description: `Connected to wallet: ${testAccount.address.substring(0, 8)}...`,
+      });
+    } catch (error) {
+      console.error('Error connecting wallet:', error);
+      toast({
+        title: "Wallet Connection Failed",
+        description: "Please try again or check your wallet connection.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const validateForm = (): string | null => {
     const requiredFields: (keyof FarmData)[] = [
       "Farm Name", "Farm Email", "Farm Phone", "Farmer Name", "Wallet Address",
@@ -138,15 +168,48 @@ export default function AddFarmListing() {
       return;
     }
 
+    if (!isWalletConnected || !walletPrivateKey) {
+      toast({
+        title: "Wallet Not Connected",
+        description: "Please connect your wallet before creating a farm listing.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const success = await saveFarmData(formData as FarmData);
+      // Step 1: Tokenize the farm on Algorand blockchain
+      toast({
+        title: "Starting Tokenization",
+        description: "Creating farm tokens on Algorand blockchain...",
+      });
+
+      const tokenizationResult = await algorandService.tokenizeFarm(
+        formData as FarmData,
+        formData["Wallet Address"]!,
+        walletPrivateKey
+      );
+
+      if (!tokenizationResult.success) {
+        throw new Error(tokenizationResult.error || 'Tokenization failed');
+      }
+
+      // Step 2: Save farm data with blockchain information
+      const farmDataWithBlockchain = {
+        ...formData,
+        "Asset ID": tokenizationResult.assetId,
+        "Contract Address": tokenizationResult.contractAddress,
+        "Transaction ID": tokenizationResult.transactionId,
+      } as FarmData & { "Asset ID": number; "Contract Address": string; "Transaction ID": string };
+
+      const success = await saveFarmData(farmDataWithBlockchain);
       
       if (success) {
         toast({
-          title: "Farm Listing Created!",
-          description: "Your farm has been successfully listed and is now available for investment.",
+          title: "Farm Successfully Tokenized!",
+          description: `Your farm has been tokenized on Algorand! Asset ID: ${tokenizationResult.assetId}`,
         });
 
         // Navigate back to farmer options
@@ -155,10 +218,10 @@ export default function AddFarmListing() {
         throw new Error('Failed to save farm data');
       }
     } catch (error) {
-      console.error('Error saving farm data:', error);
-      const errorMessage = error instanceof Error ? error.message : 'There was an issue saving your farm listing. Please try again.';
+      console.error('Error in farm tokenization:', error);
+      const errorMessage = error instanceof Error ? error.message : 'There was an issue tokenizing your farm. Please try again.';
       toast({
-        title: "Error",
+        title: "Tokenization Error",
         description: errorMessage,
         variant: "destructive"
       });
@@ -419,15 +482,29 @@ export default function AddFarmListing() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="walletAddress">Pera Wallet Address *</Label>
-                <Input
-                  id="walletAddress"
-                  value={formData["Wallet Address"]}
-                  onChange={(e) => handleInputChange("Wallet Address", e.target.value)}
-                  placeholder="ALGOTESTNETADDRESS9876543210..."
-                  required
-                />
+                <div className="flex gap-2">
+                  <Input
+                    id="walletAddress"
+                    value={formData["Wallet Address"]}
+                    onChange={(e) => handleInputChange("Wallet Address", e.target.value)}
+                    placeholder="ALGOTESTNETADDRESS9876543210..."
+                    required
+                    disabled={isWalletConnected}
+                  />
+                  <Button
+                    type="button"
+                    variant={isWalletConnected ? "secondary" : "default"}
+                    onClick={connectWallet}
+                    disabled={isLoading}
+                  >
+                    {isWalletConnected ? "Connected" : "Connect Wallet"}
+                  </Button>
+                </div>
                 <p className="text-sm text-muted-foreground">
-                  Your wallet address should be 58 characters long
+                  {isWalletConnected 
+                    ? "Wallet connected successfully" 
+                    : "Click 'Connect Wallet' to generate a test wallet or connect your Pera Wallet"
+                  }
                 </p>
               </div>
 
@@ -533,12 +610,12 @@ export default function AddFarmListing() {
               {isLoading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Creating Listing...
+                  Tokenizing Farm...
                 </>
               ) : (
                 <>
                   <Save className="h-4 w-4 mr-2" />
-                  Create Farm Listing
+                  Tokenize Farm on Algorand
                 </>
               )}
             </Button>
