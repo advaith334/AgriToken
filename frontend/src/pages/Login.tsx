@@ -52,11 +52,6 @@ export default function Login() {
     };
 
     setUser(newUser);
-    
-    toast({
-      title: isLogin ? `Logged in as ${role}` : 'Account created',
-      description: `Welcome to AgriToken, ${newUser.name}!`,
-    });
 
     // Navigate to appropriate dashboard or options
     if (role === 'farmer') {
