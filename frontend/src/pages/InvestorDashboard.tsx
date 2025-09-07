@@ -82,10 +82,14 @@ export default function InvestorDashboard() {
     if (!user?.email) return;
     
     try {
-      const response = await fetch(`http://localhost:8000/api/investor-holdings/${user.email}`);
+      const response = await fetch(`http://localhost:5000/investor-holdings`);
       if (response.ok) {
         const data = await response.json();
-        setInvestorHoldings(data.holdings || []);
+        // Filter holdings by current user's email
+        const userHoldings = (data || []).filter((holding: any) => 
+          holding["Investor Email"] === user?.email
+        );
+        setInvestorHoldings(userHoldings);
       } else {
         console.log('No holdings found for user');
         setInvestorHoldings([]);
@@ -102,10 +106,10 @@ export default function InvestorDashboard() {
       setIsLoading(true);
       try {
         // Fetch farms
-        const farmsResponse = await fetch('http://localhost:8000/api/farms');
+        const farmsResponse = await fetch('http://localhost:5000/farms');
         if (farmsResponse.ok) {
           const farmsData = await farmsResponse.json();
-          setFarms(farmsData.farms || []);
+          setFarms(farmsData || []);
         } else {
           toast({
             title: 'Error loading farms',
@@ -160,7 +164,7 @@ export default function InvestorDashboard() {
     }
   };
 
-  const handleInvest = async (farmId: string, tokens: number, totalCost: number) => {
+  const handleInvest = async (farm: Farm, tokens: number, totalCost: number) => {
     // Refresh holdings after successful investment
     await fetchInvestorHoldings();
     toast({
@@ -414,6 +418,7 @@ export default function InvestorDashboard() {
         farm={selectedFarm}
         onInvest={handleInvest}
         userWalletAddress={user?.walletAddress}
+        userEmail={user?.email}
       />
 
       <FarmDetailsModal
