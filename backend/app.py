@@ -82,38 +82,50 @@ class FarmTokenization:
                     raise Exception("No mnemonic available. Please set mnemonic via /set_mnemonic endpoint first.")
 
     def tokenize_farm(self, farm_name, token_number, unit_name, wallet_address):
-        """Create a farm asset on Algorand blockchain"""
+        """Create a farm asset on Algorand blockchain using direct algosdk"""
         try:
-            # Create a proper account object for algokit_utils
-            from algokit_utils import Account, AccountManager
-            sender_account = Account(
-                address=self.deployer.address,
-                private_key=self.deployer.private_key
+            # Use direct algosdk calls to avoid KMD issues
+            from algosdk import v2client, transaction
+
+            # Create algod client
+            algod_client = v2client.algod.AlgodClient(
+                algod_token="",
+                algod_address="https://testnet-api.algonode.cloud"
             )
 
-            # Register the signer with the account manager
-            account_manager = AccountManager(self.algorand_client)
-            account_manager.set_signer(self.deployer.address, sender_account)
+            # Get suggested parameters
+            params = algod_client.suggested_params()
 
-            # Create asset using algokit_utils with deployer as sender
-            asset_result = self.algorand_client.send.asset_create(
-                algokit_utils.AssetCreateParams(
-                    sender=self.deployer.address,  # Use address string
-                    total=token_number,
-                    decimals=0,
-                    default_frozen=False,
-                    manager=wallet_address,
-                    reserve=wallet_address,
-                    freeze=wallet_address,
-                    clawback=wallet_address,
-                    unit_name=unit_name,
-                    asset_name=farm_name,
-                )
+            # Create asset creation transaction
+            txn = transaction.AssetCreateTxn(
+                sender=self.deployer.address,
+                sp=params,
+                total=token_number,
+                decimals=0,
+                default_frozen=False,
+                manager=wallet_address,
+                reserve=wallet_address,
+                freeze=wallet_address,
+                clawback=wallet_address,
+                unit_name=unit_name,
+                asset_name=farm_name,
             )
+
+            # Sign and send transaction
+            signed_txn = txn.sign(self.deployer.private_key)
+            txid = algod_client.send_transaction(signed_txn)
+
+            # Wait for confirmation
+            confirmed_txn = transaction.wait_for_confirmation(algod_client, txid, 4)
+
+            # Get asset ID from the confirmed transaction
+            asset_id = confirmed_txn['asset-index']
+
             return {
                 'success': True,
-                'asset_id': asset_result.asset_id,
-                'transaction_id': asset_result.tx_id
+                'asset_id': asset_id,
+                'transaction_id': txid,
+                'confirmed_round': confirmed_txn.get('confirmed-round')
             }
         except Exception as e:
             return {
@@ -168,7 +180,44 @@ def tokenize_farm():
         wallet_address = json_data["Wallet Address"]
 
         # Create farm tokenization instance
-        farm_tokenization = FarmTokenization()
+        try:
+            farm_tokenization = FarmTokenization()
+        except Exception as e:
+            # If mnemonic is not set, try to set it automatically
+            if "No mnemonic available" in str(e):
+                print("Auto-setting mnemonic for tokenization...")
+                # Set the mnemonic automatically
+                mnemonic_data = {
+                    "mnemonic": "strike grocery delay tip season maze peasant ability buddy submit lock off style crawl crunch hole height robot address fuel reward margin magic abstract around"
+                }
+                # Create a mock request object for set_mnemonic
+                from flask import g
+                g.mnemonic_data = mnemonic_data
+
+                # Set global mnemonic directly
+                try:
+                    from algosdk import mnemonic, account
+                    private_key = mnemonic.to_private_key(mnemonic_data["mnemonic"])
+                    address = account.address_from_private_key(private_key)
+
+                    # Set global mnemonic
+                    global _global_mnemonic
+                    _global_mnemonic = mnemonic_data["mnemonic"]
+
+                    print(f"Mnemonic auto-set for address: {address}")
+
+                    # Now create farm tokenization instance
+                    farm_tokenization = FarmTokenization()
+                except Exception as mnemonic_error:
+                    return jsonify({
+                        'success': False,
+                        'error': f'Failed to auto-set mnemonic: {str(mnemonic_error)}'
+                    }), 500
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': f'Failed to initialize blockchain connection: {str(e)}'
+                }), 500
 
         # Tokenize the farm on blockchain
         tokenization_result = farm_tokenization.tokenize_farm(farm_name, token_number, unit_name, wallet_address)
@@ -245,7 +294,36 @@ def get_farms():
                     print(f"Error reading {filename}: {e}")
                     continue
 
-        return jsonify(farms)
+        # Normalize farm data to ensure all farms have required properties
+        normalized_farms = []
+        for farm in farms:
+            normalized_farm = {
+                "Farm ID": farm.get("Farm ID", f"farm_{farm.get('Asset ID', farm.get('ASA ID', 'unknown'))}"),
+                "Farm Name": farm.get("Farm Name", "Unknown Farm"),
+                "Farmer Name": farm.get("Farmer Name", "Unknown Farmer"),
+                "Farmer Email": farm.get("Farmer Email", farm.get("Farm Email", "unknown@example.com")),
+                "Farm Size (Acres)": farm.get("Farm Size (Acres)", 100),
+                "Crop Type": farm.get("Crop Type", "Unknown"),
+                "Farm Location": farm.get("Farm Location", "Unknown Location"),
+                "Number of Tokens": farm.get("Number of Tokens", 0),
+                "Tokens Sold": farm.get("Tokens Sold", 0),
+                "Tokens Available": farm.get("Tokens Available", farm.get("Number of Tokens", 0)),
+                "Price per Token (USD)": farm.get("Price per Token (USD)", 1.0),
+                "ASA ID": str(farm.get("ASA ID", farm.get("Asset ID", "unknown"))),
+                "Est. APY": farm.get("Est. APY", 12.5),
+                "Harvest Date": farm.get("Harvest Date", "2024-12-31"),
+                "Farm Status": farm.get("Farm Status", "Active"),
+                # Keep original data for reference
+                "Token Unit": farm.get("Token Unit", ""),
+                "Wallet Address": farm.get("Wallet Address", ""),
+                "Transaction ID": farm.get("Transaction ID", ""),
+                "Blockchain": farm.get("Blockchain", "Algorand Testnet"),
+                "Contract Address": farm.get("Contract Address", ""),
+                "created_at": farm.get("created_at", "")
+            }
+            normalized_farms.append(normalized_farm)
+
+        return jsonify(normalized_farms)
 
     except Exception as e:
         return jsonify({

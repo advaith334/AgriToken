@@ -61,13 +61,13 @@ export default function FarmerDashboard() {
       console.log('Fetching farms for user:', user.email);
       
       try {
-        const response = await fetch(`http://localhost:8000/api/farms/${user.email}`);
+        const response = await fetch(`http://localhost:5000/farms`);
         console.log('API response status:', response.status);
         
         if (response.ok) {
           const data = await response.json();
           console.log('API response data:', data);
-          setUserFarms(data.farms || []);
+          setUserFarms(data || []);
         } else {
           const errorText = await response.text();
           console.error('API error:', response.status, errorText);
@@ -92,11 +92,11 @@ export default function FarmerDashboard() {
     fetchFarmerFarms();
   }, [user?.email, toast]);
 
-  const totalAcres = userFarms.reduce((sum, farm) => sum + farm["Farm Size (Acres)"], 0);
-  const totalTokensSold = userFarms.reduce((sum, farm) => sum + farm["Tokens Sold"], 0);
-  const totalTokens = userFarms.reduce((sum, farm) => sum + farm["Number of Tokens"], 0);
-  const lastRevenue = userFarms.reduce((sum, farm) => sum + (farm["Price per Token (USD)"] * farm["Tokens Sold"] * 0.125), 0); // 12.5% APY
-  const nextExpectedPayout = userFarms.reduce((sum, farm) => sum + (farm["Price per Token (USD)"] * farm["Tokens Sold"] * 0.125), 0); // 12.5% APY
+  const totalAcres = userFarms.reduce((sum, farm) => sum + (farm["Farm Size (Acres)"] || 0), 0);
+  const totalTokensSold = userFarms.reduce((sum, farm) => sum + (farm["Tokens Sold"] || 0), 0);
+  const totalTokens = userFarms.reduce((sum, farm) => sum + (farm["Number of Tokens"] || 0), 0);
+  const lastRevenue = userFarms.reduce((sum, farm) => sum + ((farm["Price per Token (USD)"] || 0) * (farm["Tokens Sold"] || 0) * 0.125), 0); // 12.5% APY
+  const nextExpectedPayout = userFarms.reduce((sum, farm) => sum + ((farm["Price per Token (USD)"] || 0) * (farm["Tokens Sold"] || 0) * 0.125), 0); // 12.5% APY
 
   const handleSimulateEvent = async (eventType: 'drought' | 'flood' | 'normal') => {
     setIsSimulating(true);
@@ -237,10 +237,9 @@ export default function FarmerDashboard() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="farms">My Farms</TabsTrigger>
-          <TabsTrigger value="crops">Crops</TabsTrigger>
           <TabsTrigger value="payouts">Payouts</TabsTrigger>
         </TabsList>
 
@@ -391,7 +390,7 @@ export default function FarmerDashboard() {
                     <div className="flex justify-between items-start">
                       <div>
                         <CardTitle>{farm["Farm Name"]}</CardTitle>
-                        <CardDescription>{farm["Farm Location"]} • {farm["Farm Size (Acres)"]} acres • {farm["Crop Type"]}</CardDescription>
+                        <CardDescription>{farm["Farm Location"] || "Unknown Location"} • {farm["Farm Size (Acres)"] || 0} acres • {farm["Crop Type"] || "Unknown"}</CardDescription>
                       </div>
                       <div className="text-right">
                         <div className="text-sm text-muted-foreground">ASA ID</div>
@@ -403,15 +402,15 @@ export default function FarmerDashboard() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div>
                         <div className="text-sm text-muted-foreground">Token Supply</div>
-                        <div className="font-medium">{farm["Number of Tokens"].toLocaleString()}</div>
+                        <div className="font-medium">{(farm["Number of Tokens"] || 0).toLocaleString()}</div>
                       </div>
                       <div>
                         <div className="text-sm text-muted-foreground">Tokens Sold</div>
-                        <div className="font-medium">{farm["Tokens Sold"].toLocaleString()}</div>
+                        <div className="font-medium">{(farm["Tokens Sold"] || 0).toLocaleString()}</div>
                       </div>
                       <div>
                         <div className="text-sm text-muted-foreground">Price/Token</div>
-                        <div className="font-medium">${farm["Price per Token (USD)"]}</div>
+                        <div className="font-medium">${farm["Price per Token (USD)"] || 0}</div>
                       </div>
                       <div>
                         <div className="text-sm text-muted-foreground">Status</div>
