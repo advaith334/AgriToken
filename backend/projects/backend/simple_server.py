@@ -35,37 +35,43 @@ class PayoutRequest(BaseModel):
     description: str
 
 class CreateFarmRequest(BaseModel):
-    "Farm ID": str
-    "Farm Name": str
-    "Farm Website": str
-    "Farm Email": str
-    "Farm Phone": str
-    "Farmer Name": str
-    "Farmer Email": str
-    "Wallet Address": str
-    "Farm Size (Acres)": int
-    "Crop Type": str
-    "Farm Location": str
-    "Number of Tokens": int
-    "Tokens Sold": int
-    "Tokens Available": int
-    "Token Name": str
-    "Token Unit": str
-    "Price per Token (USD)": float
-    "ASA ID": str
-    "Est. APY": float
-    "Expected Yield /unit": int
-    "Harvest Date": str
-    "Payout Method": str
-    "Insurance Enabled": bool
-    "Insurance Type": str
-    "Verification Method": str
-    "Farm Images": list
-    "Historical Yield": list
-    "Local Currency": str
-    "Farm Status": str
-    "Created At": str
-    "Last Updated": str
+    farm_id: str
+    farm_name: str
+    farm_website: str
+    farm_email: str
+    farm_phone: str
+    farmer_name: str
+    farmer_email: str
+    wallet_address: str
+    farm_size_acres: int
+    crop_type: str
+    farm_location: str
+    number_of_tokens: int
+    tokens_sold: int
+    tokens_available: int
+    token_name: str
+    token_unit: str
+    price_per_token_usd: float
+    asa_id: str
+    est_apy: float
+    expected_yield_per_unit: int
+    harvest_date: str
+    payout_method: str
+    insurance_enabled: bool
+    insurance_type: str
+    verification_method: str
+    farm_images: list
+    historical_yield: list
+    local_currency: str
+    farm_status: str
+    created_at: str
+    last_updated: str
+
+class InvestmentRequest(BaseModel):
+    farm_id: str
+    investor_email: str
+    tokens_to_buy: int
+    total_cost: float
 
 @app.get("/")
 async def root():
@@ -427,6 +433,128 @@ async def create_farm(farm_data: dict):
         raise
     except Exception as e:
         print(f"Unexpected error creating farm: {e}")
+        raise HTTPException(
+            status_code=500, 
+            detail="An unexpected error occurred. Please try again."
+        )
+
+@app.post("/api/invest")
+async def create_investment(request: InvestmentRequest):
+    try:
+        # Paths to data files
+        farm_data_path = "../../../data/farm_info/langs_farm.json"
+        holdings_path = "../../../data/investor_holdings.json"
+        
+        # Load farm data
+        if not os.path.exists(farm_data_path):
+            raise HTTPException(
+                status_code=404, 
+                detail="Farm data not found."
+            )
+        
+        with open(farm_data_path, 'r', encoding='utf-8') as f:
+            farm_data = json.load(f)
+        
+        # Find the farm
+        farm = None
+        for f in farm_data["farms"]:
+            if f.get("Farm ID") == request.farm_id:
+                farm = f
+                break
+        
+        if not farm:
+            raise HTTPException(
+                status_code=404, 
+                detail="Farm not found."
+            )
+        
+        # Check if enough tokens are available
+        if farm.get("Tokens Available", 0) < request.tokens_to_buy:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Not enough tokens available. Only {farm.get('Tokens Available', 0)} tokens are available."
+            )
+        
+        # Verify the total cost matches
+        expected_cost = request.tokens_to_buy * farm.get("Price per Token (USD)", 0)
+        if abs(expected_cost - request.total_cost) > 0.01:  # Allow for small floating point differences
+            raise HTTPException(
+                status_code=400, 
+                detail="Total cost does not match the expected amount."
+            )
+        
+        # Load investor holdings
+        if not os.path.exists(holdings_path):
+            os.makedirs(os.path.dirname(holdings_path), exist_ok=True)
+            holdings_data = {"holdings": []}
+        else:
+            with open(holdings_path, 'r', encoding='utf-8') as f:
+                holdings_data = json.load(f)
+        
+        # Check if investor already has holdings in this farm
+        existing_holding = None
+        for holding in holdings_data["holdings"]:
+            if (holding.get("Investor Email", "").lower() == request.investor_email.lower() and 
+                holding.get("Farm ID") == request.farm_id):
+                existing_holding = holding
+                break
+        
+        current_date = datetime.now().strftime("%Y-%m-%d")
+        
+        if existing_holding:
+            # Update existing holding
+            existing_holding["Tokens Owned"] += request.tokens_to_buy
+            existing_holding["Cost Basis"] += request.total_cost
+            existing_holding["Est. Value"] = existing_holding["Tokens Owned"] * farm.get("Price per Token (USD)", 0)
+            existing_holding["P&L"] = existing_holding["Est. Value"] - existing_holding["Cost Basis"]
+            existing_holding["P&L Percentage"] = (existing_holding["P&L"] / existing_holding["Cost Basis"]) * 100 if existing_holding["Cost Basis"] > 0 else 0
+        else:
+            # Create new holding
+            new_holding = {
+                "Investor Email": request.investor_email,
+                "Investor Name": "Investor",  # This would come from user data in a real app
+                "Farm ID": request.farm_id,
+                "Farm Name": farm.get("Farm Name", ""),
+                "Tokens Owned": request.tokens_to_buy,
+                "Cost Basis": request.total_cost,
+                "Purchase Date": current_date,
+                "ASA ID": farm.get("ASA ID", ""),
+                "Token Price": farm.get("Price per Token (USD)", 0),
+                "Est. Value": request.tokens_to_buy * farm.get("Price per Token (USD)", 0),
+                "P&L": 0,
+                "P&L Percentage": 0,
+                "Last Payout": None,
+                "Total Payouts Received": 0
+            }
+            holdings_data["holdings"].append(new_holding)
+        
+        # Update farm data
+        farm["Tokens Sold"] += request.tokens_to_buy
+        farm["Tokens Available"] -= request.tokens_to_buy
+        farm["Last Updated"] = current_date
+        
+        # Save updated data
+        with open(farm_data_path, 'w', encoding='utf-8') as f:
+            json.dump(farm_data, f, indent=2, ensure_ascii=False)
+        
+        with open(holdings_path, 'w', encoding='utf-8') as f:
+            json.dump(holdings_data, f, indent=2, ensure_ascii=False)
+        
+        return {
+            "message": "Investment successful",
+            "investment": {
+                "farm_name": farm.get("Farm Name"),
+                "tokens_purchased": request.tokens_to_buy,
+                "total_cost": request.total_cost,
+                "price_per_token": farm.get("Price per Token (USD)"),
+                "transaction_date": current_date
+            }
+        }
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Unexpected error creating investment: {e}")
         raise HTTPException(
             status_code=500, 
             detail="An unexpected error occurred. Please try again."

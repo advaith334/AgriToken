@@ -13,8 +13,8 @@
       "Crop Type": "Maize",
       "Farm Location": "Nakuru, Kenya",
       "Number of Tokens": 10000,
-      "Tokens Sold": 6250,
-      "Tokens Available": 3750,
+      "Tokens Sold": 10000,
+      "Tokens Available": 0,
       "Token Name": "GVM",
       "Token Unit": "GREENVALLEY",
       "Price per Token (USD)": 12.5,
@@ -26,12 +26,18 @@
       "Insurance Enabled": true,
       "Insurance Type": "Parametric Weather-Based",
       "Verification Method": "Self-Reported",
-      "Farm Images": ["https://greenvalleymaize.com/images/farm1.jpg"],
-      "Historical Yield": [4800, 5000, 5100],
+      "Farm Images": [
+        "https://greenvalleymaize.com/images/farm1.jpg"
+      ],
+      "Historical Yield": [
+        4800,
+        5000,
+        5100
+      ],
       "Local Currency": "USD",
       "Farm Status": "Active",
       "Created At": "2024-01-15",
-      "Last Updated": "2024-01-15"
+      "Last Updated": "2025-09-07"
     },
     {
       "Farm ID": "farm_002",
@@ -59,8 +65,14 @@
       "Insurance Enabled": true,
       "Insurance Type": "Parametric Weather-Based",
       "Verification Method": "Self-Reported",
-      "Farm Images": ["https://sunridgecoffee.com/images/farm1.jpg"],
-      "Historical Yield": [2800, 3000, 3200],
+      "Farm Images": [
+        "https://sunridgecoffee.com/images/farm1.jpg"
+      ],
+      "Historical Yield": [
+        2800,
+        3000,
+        3200
+      ],
       "Local Currency": "USD",
       "Farm Status": "Active",
       "Created At": "2024-02-01",
