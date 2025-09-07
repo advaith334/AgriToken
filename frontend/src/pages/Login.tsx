@@ -10,63 +10,72 @@ import { useToast } from "@/hooks/use-toast";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   
   const navigate = useNavigate();
   const { setUser } = useAppStore();
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Demo authentication - in a real app, this would validate against the backend
-    const newUser = {
-      id: 'demo-user',
-      name: 'Demo User',
-      email,
-      role: 'investor' as const,
-      connectedWallet: false,
-    };
+    if (!email || !password) {
+      toast({
+        title: 'Please fill in all fields',
+        description: 'Email and password are required.',
+        variant: 'destructive'
+      });
+      return;
+    }
 
-    setUser(newUser);
-    
-    toast({
-      title: 'Logged in successfully',
-      description: `Welcome to AgriToken, ${newUser.name}!`,
-    });
+    setIsLoading(true);
 
-    // Navigate to appropriate dashboard
-    navigate('/investor');
-  };
+    try {
+      const response = await fetch('http://localhost:8000/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-  const handleDemoLogin = (demoRole: 'farmer' | 'investor') => {
-    const users = {
-      farmer: {
-        id: 'farmer-demo',
-        name: 'John Kimani',
-        email: 'john@greenvalley.farm',
-        role: 'farmer' as const,
-        connectedWallet: true,
-        walletAddress: 'ALGO_FARM_...8901'
-      },
-      investor: {
-        id: 'investor-demo',
-        name: 'Sarah Chen',
-        email: 'sarah@email.com',
-        role: 'investor' as const,
-        connectedWallet: true,
-        walletAddress: 'ALGO_INV_...2345'
+      if (response.ok) {
+        const result = await response.json();
+        const userData = result.user;
+        
+        setUser(userData);
+        
+        toast({
+          title: 'Logged in successfully',
+          description: `Welcome to AgriToken, ${userData.name}!`,
+        });
+
+        // Navigate to appropriate dashboard based on user role
+        if (userData.role === 'farmer') {
+          navigate('/farmer');
+        } else {
+          navigate('/investor');
+        }
+      } else {
+        const error = await response.json();
+        toast({
+          title: 'Login failed',
+          description: error.detail || 'Invalid email or password.',
+          variant: 'destructive'
+        });
       }
-    };
-
-    setUser(users[demoRole]);
-    
-    toast({
-      title: `Demo login successful`,
-      description: `Logged in as ${users[demoRole].name}`,
-    });
-
-    navigate(`/${demoRole}`);
+    } catch (error) {
+      toast({
+        title: 'Network error',
+        description: 'Unable to connect to the server. Please make sure the backend server is running.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+
 
   const isLoginValid = email.length > 0 && password.length > 0;
 
@@ -105,42 +114,11 @@ export default function Login() {
               />
             </div>
 
-            <Button type="submit" className="w-full" variant="hero" disabled={!isLoginValid}>
-              Sign In
+            <Button type="submit" className="w-full" variant="hero" disabled={!isLoginValid || isLoading}>
+              {isLoading ? 'Signing In...' : 'Sign In'}
             </Button>
           </form>
 
-          <div className="space-y-2">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  Or try demo accounts
-                </span>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleDemoLogin('farmer')}
-                className="text-xs"
-              >
-                Demo Farmer
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleDemoLogin('investor')}
-                className="text-xs"
-              >
-                Demo Investor
-              </Button>
-            </div>
-          </div>
 
           <Button
             variant="ghost"

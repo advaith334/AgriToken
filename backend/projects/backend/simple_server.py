@@ -24,6 +24,10 @@ class SignupRequest(BaseModel):
     walletAddress: str
     role: str
 
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
 @app.get("/")
 async def root():
     return {"message": "AgriToken Backend API is running"}
@@ -88,6 +92,74 @@ async def signup(request: SignupRequest):
         raise
     except Exception as e:
         print(f"Unexpected error during signup: {e}")
+        raise HTTPException(
+            status_code=500, 
+            detail="An unexpected error occurred. Please try again."
+        )
+
+@app.post("/api/login")
+async def login(request: LoginRequest):
+    try:
+        # Path to the signup_info.json file
+        signup_data_path = "../../../data/user_info/signup_info.json"
+        
+        # Load user data
+        if not os.path.exists(signup_data_path):
+            raise HTTPException(
+                status_code=404, 
+                detail="User database not found. Please contact support."
+            )
+        
+        with open(signup_data_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        # Find user by email
+        user = None
+        for u in data["users"]:
+            if u.get("User Email", "").lower() == request.email.lower():
+                user = u
+                break
+        
+        if not user:
+            raise HTTPException(
+                status_code=401, 
+                detail="Invalid email or password."
+            )
+        
+        # Check password
+        if user.get("User Password", "") != request.password:
+            raise HTTPException(
+                status_code=401, 
+                detail="Invalid email or password."
+            )
+        
+        # Check if user is active
+        if user.get("User Status", "") != "Active":
+            raise HTTPException(
+                status_code=403, 
+                detail="Account is inactive. Please contact support."
+            )
+        
+        # Return user data (without password)
+        return {
+            "message": "Login successful",
+            "user": {
+                "id": f"user_{user.get('User Email', '').replace('@', '_').replace('.', '_')}",
+                "name": f"{user.get('User First Name', '')} {user.get('User Last Name', '')}",
+                "email": user.get("User Email", ""),
+                "role": user.get("User Role", "").lower(),
+                "walletAddress": user.get("Wallet Address", ""),
+                "connectedWallet": True,
+                "status": user.get("User Status", ""),
+                "createdAt": user.get("User Created At", ""),
+                "updatedAt": user.get("User Updated At", "")
+            }
+        }
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Unexpected error during login: {e}")
         raise HTTPException(
             status_code=500, 
             detail="An unexpected error occurred. Please try again."
