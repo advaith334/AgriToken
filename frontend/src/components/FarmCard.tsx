@@ -42,26 +42,6 @@ export function FarmCard({ farm, onInvest }: FarmCardProps) {
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* Farm Image */}
-        <div className="aspect-video bg-gradient-to-br from-green-100 to-green-200 rounded-lg flex items-center justify-center">
-          {farm["Farm Images"] && Array.isArray(farm["Farm Images"]) && farm["Farm Images"].length > 0 ? (
-            <img 
-              src={farm["Farm Images"][0]} 
-              alt={farm["Farm Name"]}
-              className="w-full h-full object-cover rounded-lg"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.style.display = 'none';
-                target.nextElementSibling?.classList.remove('hidden');
-              }}
-            />
-          ) : null}
-          <div className={`text-center text-green-600 ${farm["Farm Images"] && Array.isArray(farm["Farm Images"]) && farm["Farm Images"].length > 0 ? 'hidden' : ''}`}>
-            <div className="text-4xl mb-2">🌾</div>
-            <p className="text-sm font-medium">Farm Image</p>
-          </div>
-        </div>
-
         {/* Location */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <MapPin className="h-4 w-4" />
