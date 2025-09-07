@@ -59,11 +59,6 @@ export default function Login() {
     };
 
     setUser(users[demoRole]);
-    
-    toast({
-      title: `Demo login successful`,
-      description: `Logged in as ${users[demoRole].name}`,
-    });
 
     if (demoRole === 'farmer') {
       navigate('/farmer/options');

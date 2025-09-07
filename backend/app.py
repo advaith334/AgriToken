@@ -140,6 +140,35 @@ def tokenize_farm():
             'error': f'Server error: {str(e)}'
         }), 500
 
+@app.route('/farms', methods=['GET'])
+def get_farms():
+    """Get all farm data from JSON files"""
+    try:
+        farms = []
+
+        # Check if data directory exists
+        if not os.path.exists(DATA_DIR):
+            return jsonify([])
+
+        # Read all JSON files in the farm_info directory
+        for filename in os.listdir(DATA_DIR):
+            if filename.endswith('.json'):
+                filepath = os.path.join(DATA_DIR, filename)
+                try:
+                    with open(filepath, 'r') as f:
+                        farm_data = json.load(f)
+                        farms.append(farm_data)
+                except (json.JSONDecodeError, IOError) as e:
+                    print(f"Error reading {filename}: {e}")
+                    continue
+
+        return jsonify(farms)
+
+    except Exception as e:
+        return jsonify({
+            'error': f'Failed to load farm data: {str(e)}'
+        }), 500
+
 @app.route('/health', methods=['GET'])
 def health_check():
     return jsonify({'status': 'healthy', 'message': 'Farm Tokenization API is running'})
