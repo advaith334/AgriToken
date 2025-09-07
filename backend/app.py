@@ -157,7 +157,7 @@ def get_farms():
                 try:
                     with open(filepath, 'r') as f:
                         farm_data = json.load(f)
-                        
+
                         # Handle different data structures
                         if isinstance(farm_data, dict):
                             # If the file contains a "farms" array, extract those farms
@@ -169,7 +169,7 @@ def get_farms():
                         # If it's already a list, extend the farms list
                         elif isinstance(farm_data, list):
                             farms.extend(farm_data)
-                            
+
                 except (json.JSONDecodeError, IOError) as e:
                     print(f"Error reading {filename}: {e}")
                     continue
