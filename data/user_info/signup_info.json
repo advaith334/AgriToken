@@ -1,0 +1,26 @@
+{
+  "users": [
+    {
+      "User First Name": "John",
+      "User Last Name": "Doe",
+      "Wallet Address": "PKAQUSHTREQMA7OVUYA5YU2LLEEE54OQMF2AQXPJAFKEPQUEXE7YNI26MQ",
+      "User Email": "john.doe@example.com",
+      "User Password": "password",
+      "User Role": "Farmer",
+      "User Status": "Active",
+      "User Created At": "2021-01-01",
+      "User Updated At": "2021-01-01"
+    },
+    {
+      "User First Name": "donald",
+      "User Last Name": "duck",
+      "Wallet Address": "PKAQUSHTREQMA7OVUYA5YU2LLEEE54OQMF2AQXPJAFKEPQUEXE7YNI26MQ",
+      "User Email": "donald@gmail.com",
+      "User Password": "donaldduck",
+      "User Role": "Farmer",
+      "User Status": "Active",
+      "User Created At": "2025-09-07",
+      "User Updated At": "2025-09-07"
+    }
+  ]
+}

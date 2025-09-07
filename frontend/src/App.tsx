@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import FarmerDashboard from "./pages/FarmerDashboard";
 import InvestorDashboard from "./pages/InvestorDashboard";
 import ExploreFarms from "./pages/ExploreFarms";
@@ -20,12 +21,17 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true
+        }}
+      >
         <Navbar />
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
           <Route path="/farmer" element={<FarmerDashboard />} />
           <Route path="/farmer/options" element={<FarmerOptions />} />
           <Route path="/farmer/add-listing" element={<AddFarmListing />} />

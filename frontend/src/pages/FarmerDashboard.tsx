@@ -53,8 +53,7 @@ export default function FarmerDashboard() {
 
     const result = eventResults[eventType];
     const grossRevenue = nextExpectedPayout * result.multiplier;
-    const fees = grossRevenue * 0.05; // 5% fees
-    const netDistribution = grossRevenue - fees;
+    const netDistribution = grossRevenue; // No platform fees
 
     // Add new distribution
     addDistribution({
@@ -62,7 +61,7 @@ export default function FarmerDashboard() {
       type: eventType === 'normal' ? 'harvest' : 'insurance',
       date: new Date().toISOString().split('T')[0],
       gross: grossRevenue,
-      fees,
+      fees: 0, // No platform fees
       net: netDistribution,
       recipientsCount: Math.floor(totalTokensSold / 100), // Estimate token holders
       status: 'completed'
@@ -70,7 +69,7 @@ export default function FarmerDashboard() {
 
     toast({
       title: result.message,
-      description: `Net distribution: $${netDistribution.toLocaleString()}`,
+      description: `Expected distribution: $${netDistribution.toLocaleString()}`,
       variant: eventType === 'normal' ? 'default' : 'destructive',
     });
 
@@ -198,17 +197,9 @@ export default function FarmerDashboard() {
                 )}
 
                 <div className="space-y-2 pt-4 border-t text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Expected Gross:</span>
-                    <span>${nextExpectedPayout.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Platform Fee (5%):</span>
-                    <span>${(nextExpectedPayout * 0.05).toLocaleString()}</span>
-                  </div>
                   <div className="flex justify-between font-medium">
-                    <span>Net to Distribute:</span>
-                    <span>${(nextExpectedPayout * 0.95).toLocaleString()}</span>
+                    <span>Expected Distribution:</span>
+                    <span>${nextExpectedPayout.toLocaleString()}</span>
                   </div>
                 </div>
               </CardContent>
