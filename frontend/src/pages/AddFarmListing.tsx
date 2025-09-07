@@ -145,8 +145,8 @@ export default function AddFarmListing() {
         description: `Your farm has been tokenized on Algorand! Asset ID: ${result.asset_id}`,
       });
 
-      // Navigate back to farmer options
-      navigate('/farmer/options');
+      // Navigate back to farmer dashboard
+      navigate('/farmer');
       
     } catch (error) {
       console.error('Error in farm tokenization:', error);

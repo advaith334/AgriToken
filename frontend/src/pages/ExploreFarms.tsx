@@ -34,8 +34,11 @@ export default function ExploreFarms() {
         }
         const farmData = await response.json();
         console.log('Farm data received:', farmData);
-        setFarms(farmData);
-        setFilteredFarms(farmData);
+        
+        // Ensure farmData is an array
+        const farmsArray = Array.isArray(farmData) ? farmData : [];
+        setFarms(farmsArray);
+        setFilteredFarms(farmsArray);
       } catch (error) {
         console.error('Error loading farms:', error);
         toast({
