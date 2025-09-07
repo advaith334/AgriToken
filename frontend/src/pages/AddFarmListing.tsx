@@ -38,10 +38,7 @@ export default function AddFarmListing() {
     "Expected Yield /unit": 0,
     "Harvest Date": "",
     "Payout Method": "ALGO",
-    "Insurance Enabled": false,
-    "Insurance Type": "",
     "Verification Method": "Self-Reported",
-    "Farm Images": [],
     "Historical Yield": [],
     "Local Currency": "USD"
   });
@@ -76,15 +73,6 @@ export default function AddFarmListing() {
     setFormData(prev => ({
       ...prev,
       "Historical Yield": yields
-    }));
-  };
-
-  const handleFarmImagesChange = (value: string) => {
-    setFarmImagesInput(value);
-    const images = value.split(',').map(url => url.trim()).filter(url => url.length > 0);
-    setFormData(prev => ({
-      ...prev,
-      "Farm Images": images
     }));
   };
 
@@ -519,76 +507,6 @@ export default function AddFarmListing() {
                     <SelectItem value="Third-Party Audited">Third-Party Audited</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="insuranceEnabled">Insurance</Label>
-                <Select 
-                  value={formData["Insurance Enabled"] ? "enabled" : "disabled"} 
-                  onValueChange={(value) => handleInputChange("Insurance Enabled", value === "enabled")}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="enabled">Insurance Enabled</SelectItem>
-                    <SelectItem value="disabled">No Insurance</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {formData["Insurance Enabled"] && (
-                <div className="space-y-2">
-                  <Label htmlFor="insuranceType">Insurance Type</Label>
-                  <Select value={formData["Insurance Type"]} onValueChange={(value) => handleInputChange("Insurance Type", value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select insurance type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Parametric Drought-Based">Parametric Drought-Based</SelectItem>
-                      <SelectItem value="Parametric Frost-Based">Parametric Frost-Based</SelectItem>
-                      <SelectItem value="Yield-Based">Yield-Based</SelectItem>
-                      <SelectItem value="Revenue-Based">Revenue-Based</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Historical Data */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Historical Data</CardTitle>
-              <CardDescription>
-                Provide historical yield data to help investors make informed decisions
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="historicalYield">Historical Yield (comma-separated)</Label>
-                <Input
-                  id="historicalYield"
-                  value={historicalYieldInput}
-                  onChange={(e) => handleHistoricalYieldChange(e.target.value)}
-                  placeholder="e.g., 4300, 4500, 4600"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Enter yield data from previous years separated by commas
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="farmImages">Farm Images (comma-separated URLs)</Label>
-                <Input
-                  id="farmImages"
-                  value={farmImagesInput}
-                  onChange={(e) => handleFarmImagesChange(e.target.value)}
-                  placeholder="https://yourfarm.com/image1.jpg, https://yourfarm.com/image2.jpg"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Add URLs to images of your farm (optional)
-                </p>
               </div>
             </CardContent>
           </Card>
