@@ -6,37 +6,54 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { DollarSign, Coins, TrendingUp } from "lucide-react";
-
-interface Farm {
-  "Farm ID": string;
-  "Farm Name": string;
-  "Crop Type": string;
-  "Farm Location": string;
-  "Price per Token (USD)": number;
-  "Tokens Available": number;
-  "Est. APY": number;
-  "ASA ID": string;
-}
+import { FarmData } from "@/types/farm";
+import MnemonicModal from "./MnemonicModal";
 
 interface InvestmentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  farm: Farm | null;
-  onInvest: (farmId: string, tokens: number, totalCost: number) => void;
-  userEmail?: string;
+  farm: FarmData | null;
+  onInvest: (farm: FarmData, tokens: number, totalCost: number) => void;
+  userWalletAddress?: string;
 }
 
-export default function InvestmentModal({ isOpen, onClose, farm, onInvest, userEmail }: InvestmentModalProps) {
+export default function InvestmentModal({ isOpen, onClose, farm, onInvest, userWalletAddress }: InvestmentModalProps) {
   const [tokensToBuy, setTokensToBuy] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isMnemonicModalOpen, setIsMnemonicModalOpen] = useState(false);
+  const [mnemonicSet, setMnemonicSet] = useState(false);
   const { toast } = useToast();
 
   if (!farm) return null;
 
   const pricePerToken = farm["Price per Token (USD)"];
-  const availableTokens = farm["Tokens Available"];
+  const availableTokens = farm["Number of Tokens"];
   const totalCost = parseFloat(tokensToBuy) * pricePerToken || 0;
-  const estimatedAnnualReturn = totalCost * (farm["Est. APY"] / 100);
+  const estimatedAnnualReturn = totalCost * 0.1; // Assuming 10% APY for now
+
+  const handleMnemonicSubmit = async (mnemonic: string): Promise<boolean> => {
+    try {
+      const response = await fetch('http://localhost:5000/set_mnemonic', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ mnemonic }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setMnemonicSet(true);
+          return true;
+        }
+      }
+      return false;
+    } catch (error) {
+      console.error('Error setting mnemonic:', error);
+      return false;
+    }
+  };
 
   const handleInvest = async () => {
     const tokens = parseInt(tokensToBuy);
@@ -59,40 +76,72 @@ export default function InvestmentModal({ isOpen, onClose, farm, onInvest, userE
       return;
     }
 
+    if (!userWalletAddress) {
+      toast({
+        title: 'Wallet address required',
+        description: 'Please connect your wallet to make an investment.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (!farm["Asset ID"]) {
+      toast({
+        title: 'Asset not found',
+        description: 'This farm has not been tokenized yet.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    // Check if mnemonic is set, if not, prompt for it
+    if (!mnemonicSet) {
+      setIsMnemonicModalOpen(true);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/api/invest', {
+      const response = await fetch('http://localhost:5000/transfer_assets', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          farm_id: farm["Farm ID"],
-          investor_email: userEmail || 'demo@investor.com',
-          tokens_to_buy: tokens,
-          total_cost: totalCost
+          asset_id: farm["Asset ID"],
+          sender_address: farm["Wallet Address"], // Farmer's wallet
+          receiver_address: userWalletAddress, // Investor's wallet
+          amount: tokens
         }),
       });
 
       if (response.ok) {
         const result = await response.json();
         
-        onInvest(farm["Farm ID"], tokens, totalCost);
-        
-        toast({
-          title: 'Investment successful!',
-          description: `You have purchased ${tokens.toLocaleString()} tokens in ${farm["Farm Name"]}.`,
-        });
+        if (result.success) {
+          onInvest(farm, tokens, totalCost);
+          
+          toast({
+            title: 'Investment successful!',
+            description: `You have purchased ${tokens.toLocaleString()} tokens in ${farm["Farm Name"]}. Transaction ID: ${result.transaction_id}`,
+          });
 
-        // Reset form and close modal
-        setTokensToBuy("");
-        onClose();
+          // Reset form and close modal
+          setTokensToBuy("");
+          onClose();
+        } else {
+          toast({
+            title: 'Investment failed',
+            description: result.error || 'An error occurred while processing your investment.',
+            variant: 'destructive'
+          });
+        }
       } else {
         const error = await response.json();
         toast({
           title: 'Investment failed',
-          description: error.detail || 'An error occurred while processing your investment.',
+          description: error.error || 'An error occurred while processing your investment.',
           variant: 'destructive'
         });
       }
@@ -151,7 +200,17 @@ export default function InvestmentModal({ isOpen, onClose, farm, onInvest, userE
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">Est. APY</span>
-                  <span className="font-medium text-green-600">{farm["Est. APY"]}%</span>
+                  <span className="font-medium text-green-600">10%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">Asset ID</span>
+                  <span className="font-medium text-xs">{farm["Asset ID"] || "Not tokenized"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">Wallet Status</span>
+                  <span className={`font-medium text-xs ${mnemonicSet ? 'text-green-600' : 'text-orange-600'}`}>
+                    {mnemonicSet ? 'Connected' : 'Not Connected'}
+                  </span>
                 </div>
               </div>
             </CardContent>
@@ -234,12 +293,19 @@ export default function InvestmentModal({ isOpen, onClose, farm, onInvest, userE
               ) : (
                 <>
                   <DollarSign className="h-4 w-4" />
-                  Invest ${totalCost.toLocaleString()}
+                  {mnemonicSet ? `Invest $${totalCost.toLocaleString()}` : 'Connect Wallet & Invest'}
                 </>
               )}
             </Button>
           </div>
         </div>
+
+        {/* Mnemonic Modal */}
+        <MnemonicModal
+          isOpen={isMnemonicModalOpen}
+          onClose={() => setIsMnemonicModalOpen(false)}
+          onMnemonicSubmit={handleMnemonicSubmit}
+        />
       </DialogContent>
     </Dialog>
   );
