@@ -28,6 +28,12 @@ class LoginRequest(BaseModel):
     email: str
     password: str
 
+class PayoutRequest(BaseModel):
+    farm_id: str
+    payout_amount: float
+    payout_date: str
+    description: str
+
 @app.get("/")
 async def root():
     return {"message": "AgriToken Backend API is running"}
@@ -160,6 +166,185 @@ async def login(request: LoginRequest):
         raise
     except Exception as e:
         print(f"Unexpected error during login: {e}")
+        raise HTTPException(
+            status_code=500, 
+            detail="An unexpected error occurred. Please try again."
+        )
+
+@app.get("/api/farms")
+async def get_farms():
+    try:
+        # Path to the farm data file
+        farm_data_path = "../../../data/farm_info/langs_farm.json"
+        
+        if not os.path.exists(farm_data_path):
+            raise HTTPException(
+                status_code=404, 
+                detail="Farm data not found."
+            )
+        
+        with open(farm_data_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        return data
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Unexpected error getting farms: {e}")
+        raise HTTPException(
+            status_code=500, 
+            detail="An unexpected error occurred. Please try again."
+        )
+
+@app.get("/api/farms/{farmer_email}")
+async def get_farmer_farms(farmer_email: str):
+    try:
+        # Path to the farm data file
+        farm_data_path = "../../../data/farm_info/langs_farm.json"
+        
+        if not os.path.exists(farm_data_path):
+            raise HTTPException(
+                status_code=404, 
+                detail="Farm data not found."
+            )
+        
+        with open(farm_data_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        # Filter farms by farmer email
+        farmer_farms = [farm for farm in data["farms"] if farm.get("Farmer Email", "").lower() == farmer_email.lower()]
+        
+        return {"farms": farmer_farms}
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Unexpected error getting farmer farms: {e}")
+        raise HTTPException(
+            status_code=500, 
+            detail="An unexpected error occurred. Please try again."
+        )
+
+@app.get("/api/investor-holdings/{investor_email}")
+async def get_investor_holdings(investor_email: str):
+    try:
+        # Path to the investor holdings file
+        holdings_path = "../../../data/investor_holdings.json"
+        
+        if not os.path.exists(holdings_path):
+            raise HTTPException(
+                status_code=404, 
+                detail="Investor holdings data not found."
+            )
+        
+        with open(holdings_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        # Filter holdings by investor email
+        investor_holdings = [holding for holding in data["holdings"] if holding.get("Investor Email", "").lower() == investor_email.lower()]
+        
+        return {"holdings": investor_holdings}
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Unexpected error getting investor holdings: {e}")
+        raise HTTPException(
+            status_code=500, 
+            detail="An unexpected error occurred. Please try again."
+        )
+
+@app.post("/api/simulate-payout")
+async def simulate_payout(request: PayoutRequest):
+    try:
+        # Paths to data files
+        farm_data_path = "../../../data/farm_info/langs_farm.json"
+        holdings_path = "../../../data/investor_holdings.json"
+        
+        # Load farm data
+        if not os.path.exists(farm_data_path):
+            raise HTTPException(
+                status_code=404, 
+                detail="Farm data not found."
+            )
+        
+        with open(farm_data_path, 'r', encoding='utf-8') as f:
+            farm_data = json.load(f)
+        
+        # Find the farm
+        farm = None
+        for f in farm_data["farms"]:
+            if f.get("Farm ID") == request.farm_id:
+                farm = f
+                break
+        
+        if not farm:
+            raise HTTPException(
+                status_code=404, 
+                detail="Farm not found."
+            )
+        
+        # Load investor holdings
+        if not os.path.exists(holdings_path):
+            raise HTTPException(
+                status_code=404, 
+                detail="Investor holdings data not found."
+            )
+        
+        with open(holdings_path, 'r', encoding='utf-8') as f:
+            holdings_data = json.load(f)
+        
+        # Get all investors for this farm
+        farm_holdings = [holding for holding in holdings_data["holdings"] if holding.get("Farm ID") == request.farm_id]
+        
+        if not farm_holdings:
+            raise HTTPException(
+                status_code=404, 
+                detail="No investors found for this farm."
+            )
+        
+        # Calculate total tokens for this farm
+        total_tokens = sum(holding.get("Tokens Owned", 0) for holding in farm_holdings)
+        
+        if total_tokens == 0:
+            raise HTTPException(
+                status_code=400, 
+                detail="No tokens to distribute."
+            )
+        
+        # Calculate payout per token
+        payout_per_token = request.payout_amount / total_tokens
+        
+        # Calculate individual payouts
+        payout_details = []
+        for holding in farm_holdings:
+            tokens_owned = holding.get("Tokens Owned", 0)
+            individual_payout = tokens_owned * payout_per_token
+            
+            payout_details.append({
+                "investor_email": holding.get("Investor Email"),
+                "investor_name": holding.get("Investor Name"),
+                "tokens_owned": tokens_owned,
+                "payout_amount": round(individual_payout, 2),
+                "payout_per_token": round(payout_per_token, 4)
+            })
+        
+        return {
+            "message": "Payout simulation completed",
+            "farm_name": farm.get("Farm Name"),
+            "total_payout": request.payout_amount,
+            "total_tokens": total_tokens,
+            "payout_per_token": round(payout_per_token, 4),
+            "payout_date": request.payout_date,
+            "description": request.description,
+            "payout_details": payout_details
+        }
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Unexpected error simulating payout: {e}")
         raise HTTPException(
             status_code=500, 
             detail="An unexpected error occurred. Please try again."

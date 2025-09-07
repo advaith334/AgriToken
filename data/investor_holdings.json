@@ -1,0 +1,68 @@
+{
+  "holdings": [
+    {
+      "Investor Email": "donald@gmail.com",
+      "Investor Name": "Donald Duck",
+      "Farm ID": "farm_001",
+      "Farm Name": "Green Valley Maize",
+      "Tokens Owned": 1000,
+      "Cost Basis": 12500,
+      "Purchase Date": "2024-01-20",
+      "ASA ID": "89123456",
+      "Token Price": 12.5,
+      "Est. Value": 12500,
+      "P&L": 0,
+      "P&L Percentage": 0,
+      "Last Payout": null,
+      "Total Payouts Received": 0
+    },
+    {
+      "Investor Email": "sarah.chen@email.com",
+      "Investor Name": "Sarah Chen",
+      "Farm ID": "farm_001",
+      "Farm Name": "Green Valley Maize",
+      "Tokens Owned": 500,
+      "Cost Basis": 6250,
+      "Purchase Date": "2024-02-15",
+      "ASA ID": "89123456",
+      "Token Price": 12.5,
+      "Est. Value": 6250,
+      "P&L": 0,
+      "P&L Percentage": 0,
+      "Last Payout": null,
+      "Total Payouts Received": 0
+    },
+    {
+      "Investor Email": "mike.wilson@email.com",
+      "Investor Name": "Mike Wilson",
+      "Farm ID": "farm_002",
+      "Farm Name": "Sunridge Coffee",
+      "Tokens Owned": 800,
+      "Cost Basis": 20000,
+      "Purchase Date": "2024-03-01",
+      "ASA ID": "56789123",
+      "Token Price": 25,
+      "Est. Value": 20000,
+      "P&L": 0,
+      "P&L Percentage": 0,
+      "Last Payout": null,
+      "Total Payouts Received": 0
+    },
+    {
+      "Investor Email": "lisa.garcia@email.com",
+      "Investor Name": "Lisa Garcia",
+      "Farm ID": "farm_002",
+      "Farm Name": "Sunridge Coffee",
+      "Tokens Owned": 600,
+      "Cost Basis": 15000,
+      "Purchase Date": "2024-03-10",
+      "ASA ID": "56789123",
+      "Token Price": 25,
+      "Est. Value": 15000,
+      "P&L": 0,
+      "P&L Percentage": 0,
+      "Last Payout": null,
+      "Total Payouts Received": 0
+    }
+  ]
+}
