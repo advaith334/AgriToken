@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { FarmCard } from "@/components/FarmCard";
+import InvestmentModal from "@/components/InvestmentModal";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +16,8 @@ export default function ExploreFarms() {
   const [cropFilter, setCropFilter] = useState<string>("all");
   const [priceFilter, setPriceFilter] = useState<string>("all");
   const [insuranceFilter, setInsuranceFilter] = useState<string>("all");
+  const [selectedFarm, setSelectedFarm] = useState<FarmData | null>(null);
+  const [isInvestmentModalOpen, setIsInvestmentModalOpen] = useState(false);
   const { toast } = useToast();
 
   // Load farm data
@@ -87,10 +90,35 @@ export default function ExploreFarms() {
   }, [farms, searchTerm, cropFilter, priceFilter, insuranceFilter]);
 
   const handleInvest = (farm: FarmData) => {
+    setSelectedFarm(farm);
+    setIsInvestmentModalOpen(true);
+  };
+
+  const handleInvestmentComplete = (farm: FarmData, tokens: number, totalCost: number) => {
     toast({
-      title: "Investment Interest",
-      description: `You're interested in investing in ${farm["Farm Name"]}. This feature will be available soon!`,
+      title: "Investment Successful!",
+      description: `You have successfully invested $${totalCost.toLocaleString()} in ${farm["Farm Name"]} for ${tokens} tokens.`,
     });
+    
+    // Refresh farm data to update available tokens
+    const loadFarms = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/farms');
+        if (response.ok) {
+          const farmData = await response.json();
+          setFarms(farmData);
+          setFilteredFarms(farmData);
+        }
+      } catch (error) {
+        console.error('Error refreshing farm data:', error);
+      }
+    };
+    loadFarms();
+  };
+
+  const handleCloseInvestmentModal = () => {
+    setIsInvestmentModalOpen(false);
+    setSelectedFarm(null);
   };
 
   const getUniqueCropTypes = () => {
@@ -214,6 +242,15 @@ export default function ExploreFarms() {
             })}
           </div>
         )}
+
+        {/* Investment Modal */}
+        <InvestmentModal
+          isOpen={isInvestmentModalOpen}
+          onClose={handleCloseInvestmentModal}
+          farm={selectedFarm}
+          onInvest={handleInvestmentComplete}
+          userWalletAddress="DEMO_INVESTOR_WALLET_ADDRESS" // This should come from user authentication
+        />
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import os
 from datetime import datetime
 import algokit_utils
 from dotenv import load_dotenv
+import getpass
 
 # Load environment variables
 load_dotenv()
@@ -16,10 +17,47 @@ CORS(app)
 DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'data', 'farm_info')
 os.makedirs(DATA_DIR, exist_ok=True)
 
+# Global variable to store the mnemonic once entered
+_global_mnemonic = None
+
+def get_mnemonic():
+    """Get mnemonic from user input or return cached one"""
+    global _global_mnemonic
+
+    if _global_mnemonic:
+        return _global_mnemonic
+
+    print("\n" + "="*60)
+    print("🔐 MNEMONIC REQUIRED")
+    print("="*60)
+    print("To perform blockchain operations, we need your Algorand account mnemonic.")
+    print("This will be used to sign transactions for asset creation and transfers.")
+    print("⚠️  IMPORTANT: Never share your mnemonic with anyone!")
+    print("="*60)
+
+    mnemonic = getpass.getpass("Enter your 25-word mnemonic phrase: ")
+    _global_mnemonic = mnemonic
+    return mnemonic
+
 class FarmTokenization:
-    def __init__(self):
+    def __init__(self, mnemonic=None):
         self.algorand_client = algokit_utils.AlgorandClient.from_environment()
-        self.deployer = self.algorand_client.account.from_environment("DEPLOYER")
+
+        # Use provided mnemonic, cached mnemonic, or prompt user
+        if mnemonic:
+            self.deployer = self.algorand_client.account.from_mnemonic(mnemonic)
+        else:
+            # Try to get from environment first, if not available, prompt user
+            try:
+                self.deployer = self.algorand_client.account.from_environment("DEPLOYER")
+            except Exception:
+                user_mnemonic = get_mnemonic()
+                try:
+                    self.deployer = self.algorand_client.account.from_mnemonic(user_mnemonic)
+                    print(f"✅ Account loaded successfully: {self.deployer.address}")
+                except Exception as e:
+                    print(f"❌ Invalid mnemonic: {e}")
+                    raise Exception("Failed to load account from mnemonic")
 
     def tokenize_farm(self, farm_name, token_number, unit_name, wallet_address):
         """Create a farm asset on Algorand blockchain"""
@@ -179,6 +217,109 @@ def get_farms():
     except Exception as e:
         return jsonify({
             'error': f'Failed to load farm data: {str(e)}'
+        }), 500
+
+@app.route('/set_mnemonic', methods=['POST'])
+def set_mnemonic():
+    """Set the mnemonic for blockchain operations"""
+    try:
+        json_data = request.get_json()
+
+        if not json_data or 'mnemonic' not in json_data:
+            return jsonify({
+                'success': False,
+                'error': 'Mnemonic is required'
+            }), 400
+
+        mnemonic = json_data['mnemonic']
+
+        # Validate mnemonic by trying to create an account
+        try:
+            global _global_mnemonic
+            _global_mnemonic = mnemonic
+
+            # Test the mnemonic by creating a temporary instance
+            test_instance = FarmTokenization(mnemonic)
+
+            return jsonify({
+                'success': True,
+                'message': 'Mnemonic set successfully',
+                'address': test_instance.deployer.address
+            })
+
+        except Exception as e:
+            _global_mnemonic = None  # Clear invalid mnemonic
+            return jsonify({
+                'success': False,
+                'error': f'Invalid mnemonic: {str(e)}'
+            }), 400
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Server error: {str(e)}'
+        }), 500
+
+@app.route('/transfer_assets', methods=['POST'])
+def transfer_assets():
+    """Transfer farm tokens from farmer to investor"""
+    try:
+        json_data = request.get_json()
+
+        # Validate required fields
+        required_fields = ["asset_id", "sender_address", "receiver_address", "amount"]
+        for field in required_fields:
+            if field not in json_data or not json_data[field]:
+                return jsonify({
+                    'success': False,
+                    'error': f'Missing required field: {field}'
+                }), 400
+
+        asset_id = json_data["asset_id"]
+        sender_address = json_data["sender_address"]
+        receiver_address = json_data["receiver_address"]
+        amount = json_data["amount"]
+
+        # Validate amount
+        if not isinstance(amount, int) or amount <= 0:
+            return jsonify({
+                'success': False,
+                'error': 'Amount must be a positive integer'
+            }), 400
+
+        # Create farm tokenization instance
+        farm_tokenization = FarmTokenization()
+
+        # Perform asset transfer
+        try:
+            txn_result = farm_tokenization.algorand_client.send.asset_transfer(
+                algokit_utils.AssetTransferParams(
+                    sender=farm_tokenization.deployer.address,  # Using deployer as sender for now
+                    asset_id=asset_id,
+                    receiver=receiver_address,
+                    amount=amount,
+                )
+            )
+
+            return jsonify({
+                'success': True,
+                'message': f'Successfully transferred {amount} tokens',
+                'transaction_id': txn_result.tx_id,
+                'asset_id': asset_id,
+                'amount': amount,
+                'receiver': receiver_address
+            })
+
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': f'Asset transfer failed: {str(e)}'
+            }), 500
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Server error: {str(e)}'
         }), 500
 
 @app.route('/health', methods=['GET'])
