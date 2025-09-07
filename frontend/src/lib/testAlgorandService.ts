@@ -5,7 +5,6 @@ import { FarmData } from './farmService';
 // Test data
 const testFarmData: FarmData = {
   "Farm Name": "Test Farm",
-  "Farm Website": "https://testfarm.com",
   "Farm Email": "test@testfarm.com",
   "Farm Phone": "+1-555-123-4567",
   "Farmer Name": "John Doe",
@@ -22,7 +21,6 @@ const testFarmData: FarmData = {
   "Payout Method": "ALGO",
   "Verification Method": "Self-Reported",
   "Farm Images": ["https://testfarm.com/image1.jpg"],
-  "Historical Yield": [4800, 5000, 5100],
   "Local Currency": "USD"
 };
 

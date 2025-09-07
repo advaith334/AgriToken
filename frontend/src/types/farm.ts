@@ -1,6 +1,5 @@
 export interface FarmData {
   "Farm Name": string;
-  "Farm Website"?: string;
   "Farm Email": string;
   "Farm Phone": string;
   "Farmer Name": string;
@@ -19,6 +18,5 @@ export interface FarmData {
   "Insurance Type"?: string;
   "Verification Method"?: string;
   "Farm Images"?: string[];
-  "Historical Yield"?: number[];
   "Local Currency"?: string;
 }

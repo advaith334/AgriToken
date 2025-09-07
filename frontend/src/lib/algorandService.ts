@@ -65,7 +65,7 @@ class AlgorandService {
 
       // Create asset creation transaction
       const assetCreateTxn = algosdk.makeAssetCreateTxnWithSuggestedParamsFromObject({
-        from: creatorAddress,
+        sender: creatorAddress,
         total: farmData["Number of Tokens"],
         decimals: 0, // Whole tokens only
         defaultFrozen: false,
@@ -75,7 +75,6 @@ class AlgorandService {
         clawback: creatorAddress,
         unitName: farmData["Token Unit"],
         assetName: farmData["Token Name"],
-        assetURL: farmData["Farm Website"] || '',
         assetMetadataHash: undefined,
         suggestedParams,
       });
@@ -89,7 +88,7 @@ class AlgorandService {
       // Wait for confirmation
       const confirmedTxn = await algosdk.waitForConfirmation(
         this.algodClient,
-        txId.txId,
+        txId.txid,
         4
       );
 
@@ -97,7 +96,7 @@ class AlgorandService {
 
       return {
         success: true,
-        transactionId: txId.txId,
+        transactionId: txId.txid,
         assetId: assetId,
       };
     } catch (error) {
@@ -141,7 +140,7 @@ class AlgorandService {
 
       return {
         success: true,
-        contractAddress: contractAddress,
+        contractAddress: contractAddress.addr,
         transactionId: 'mock-contract-deployment-tx-id',
       };
     } catch (error) {

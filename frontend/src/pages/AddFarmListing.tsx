@@ -20,7 +20,6 @@ export default function AddFarmListing() {
   // Form state
   const [formData, setFormData] = useState<Partial<FarmData>>({
     "Farm Name": "",
-    "Farm Website": "",
     "Farm Email": "",
     "Farm Phone": "",
     "Farmer Name": "",
@@ -36,7 +35,6 @@ export default function AddFarmListing() {
     "Harvest Date": "",
     "Payout Method": "ALGO",
     "Verification Method": "Self-Reported",
-    "Historical Yield": [],
     "Local Currency": "USD"
   });
 
@@ -63,16 +61,6 @@ export default function AddFarmListing() {
       return newData;
     });
   };
-
-  const handleHistoricalYieldChange = (value: string) => {
-    setHistoricalYieldInput(value);
-    const yields = value.split(',').map(y => parseFloat(y.trim())).filter(y => !isNaN(y));
-    setFormData(prev => ({
-      ...prev,
-      "Historical Yield": yields
-    }));
-  };
-
 
   const validateForm = (): string | null => {
     const requiredFields: (keyof FarmData)[] = [
@@ -306,15 +294,6 @@ export default function AddFarmListing() {
                     required
                   />
                 </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="farmWebsite">Farm Website</Label>
-                <Input
-                  id="farmWebsite"
-                  value={formData["Farm Website"]}
-                  onChange={(e) => handleInputChange("Farm Website", e.target.value)}
-                  placeholder="https://yourfarm.com"
-                />
               </div>
             </CardContent>
           </Card>
