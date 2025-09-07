@@ -3,7 +3,7 @@ _commit: 1.6.3
 _src_path: gh:algorandfoundation/algokit-python-template
 author_email: advaith334@gmail.com
 author_name: Advaith Karthikeyan
-contract_name: tokenize_farm
+contract_name: farm_tokenization
 deployment_language: python
 preset_name: starter
 project_name: backend

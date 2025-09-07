@@ -65,7 +65,11 @@ export default function Login() {
       description: `Logged in as ${users[demoRole].name}`,
     });
 
-    navigate(`/${demoRole}`);
+    if (demoRole === 'farmer') {
+      navigate('/farmer/options');
+    } else {
+      navigate(`/${demoRole}`);
+    }
   };
 
   const isLoginValid = email.length > 0 && password.length > 0;
