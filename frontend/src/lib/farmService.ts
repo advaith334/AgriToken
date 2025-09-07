@@ -3,7 +3,6 @@
 
 export interface FarmData {
   "Farm Name": string;
-  "Farm Website": string;
   "Farm Email": string;
   "Farm Phone": string;
   "Farmer Name": string;
@@ -20,7 +19,6 @@ export interface FarmData {
   "Payout Method": string;
   "Verification Method": string;
   "Farm Images": string[];
-  "Historical Yield": number[];
   "Local Currency": string;
   // Blockchain fields (optional, added after tokenization)
   "Asset ID"?: number;

@@ -2,29 +2,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin, Phone, Mail, Globe, Calendar, DollarSign, Shield, CheckCircle } from "lucide-react";
-
-interface FarmData {
-  "Farm Name": string;
-  "Farm Website": string;
-  "Farm Email": string;
-  "Farm Phone": string;
-  "Farmer Name": string;
-  "Wallet Address": string;
-  "Farm Size (Acres)": number;
-  "Crop Type": string;
-  "Farm Location": string;
-  "Number of Tokens": number;
-  "Token Name": string;
-  "Token Unit": string;
-  "Price per Token (USD)": number;
-  "Expected Yield /unit": number;
-  "Harvest Date": string;
-  "Payout Method": string;
-  "Verification Method": string;
-  "Farm Images": string[];
-  "Historical Yield": number[];
-  "Local Currency": string;
-}
+import { FarmData } from "@/types/farm";
 
 interface FarmCardProps {
   farm: FarmData;
@@ -40,7 +18,8 @@ export function FarmCard({ farm, onInvest }: FarmCardProps) {
     });
   };
 
-  const calculateAverageYield = (yields: number[]) => {
+  const calculateAverageYield = (yields?: number[]) => {
+    if (!yields || yields.length === 0) return 0;
     return Math.round(yields.reduce((sum, yield_) => sum + yield_, 0) / yields.length);
   };
 
@@ -65,7 +44,7 @@ export function FarmCard({ farm, onInvest }: FarmCardProps) {
       <CardContent className="space-y-4">
         {/* Farm Image */}
         <div className="aspect-video bg-gradient-to-br from-green-100 to-green-200 rounded-lg flex items-center justify-center">
-          {farm["Farm Images"] && farm["Farm Images"].length > 0 ? (
+          {farm["Farm Images"] && Array.isArray(farm["Farm Images"]) && farm["Farm Images"].length > 0 ? (
             <img 
               src={farm["Farm Images"][0]} 
               alt={farm["Farm Name"]}
@@ -77,7 +56,7 @@ export function FarmCard({ farm, onInvest }: FarmCardProps) {
               }}
             />
           ) : null}
-          <div className={`text-center text-green-600 ${farm["Farm Images"] && farm["Farm Images"].length > 0 ? 'hidden' : ''}`}>
+          <div className={`text-center text-green-600 ${farm["Farm Images"] && Array.isArray(farm["Farm Images"]) && farm["Farm Images"].length > 0 ? 'hidden' : ''}`}>
             <div className="text-4xl mb-2">🌾</div>
             <p className="text-sm font-medium">Farm Image</p>
           </div>
@@ -122,14 +101,6 @@ export function FarmCard({ farm, onInvest }: FarmCardProps) {
           <span className="font-medium">Expected Yield:</span>
           <p className="text-muted-foreground">
             {farm["Expected Yield /unit"].toLocaleString()} units
-          </p>
-        </div>
-
-        {/* Historical Performance */}
-        <div className="text-sm">
-          <span className="font-medium">Avg Historical Yield:</span>
-          <p className="text-muted-foreground">
-            {calculateAverageYield(farm["Historical Yield"]).toLocaleString()} units
           </p>
         </div>
 

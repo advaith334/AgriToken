@@ -5,31 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Search, Filter, MapPin, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-interface FarmData {
-  "Farm Name": string;
-  "Farm Website": string;
-  "Farm Email": string;
-  "Farm Phone": string;
-  "Farmer Name": string;
-  "Wallet Address": string;
-  "Farm Size (Acres)": number;
-  "Crop Type": string;
-  "Farm Location": string;
-  "Number of Tokens": number;
-  "Token Name": string;
-  "Token Unit": string;
-  "Price per Token (USD)": number;
-  "Expected Yield /unit": number;
-  "Harvest Date": string;
-  "Payout Method": string;
-  "Insurance Enabled": boolean;
-  "Insurance Type": string;
-  "Verification Method": string;
-  "Farm Images": string[];
-  "Historical Yield": number[];
-  "Local Currency": string;
-}
+import { FarmData } from "@/types/farm";
 
 export default function ExploreFarms() {
   const [farms, setFarms] = useState<FarmData[]>([]);
@@ -45,11 +21,14 @@ export default function ExploreFarms() {
   useEffect(() => {
     const loadFarms = async () => {
       try {
-        const response = await fetch('/farm_info.json');
+        console.log('Fetching farms from http://localhost:5000/farms');
+        const response = await fetch('http://localhost:5000/farms');
+        console.log('Response status:', response.status);
         if (!response.ok) {
-          throw new Error('Failed to load farm data');
+          throw new Error(`Failed to load farm data: ${response.status}`);
         }
         const farmData = await response.json();
+        console.log('Farm data received:', farmData);
         setFarms(farmData);
         setFilteredFarms(farmData);
       } catch (error) {
@@ -98,9 +77,10 @@ export default function ExploreFarms() {
 
     // Insurance filter
     if (insuranceFilter !== "all") {
-      filtered = filtered.filter(farm => 
-        insuranceFilter === "insured" ? farm["Insurance Enabled"] : !farm["Insurance Enabled"]
-      );
+      filtered = filtered.filter(farm => {
+        const hasInsurance = farm["Insurance Enabled"] === true;
+        return insuranceFilter === "insured" ? hasInsurance : !hasInsurance;
+      });
     }
 
     setFilteredFarms(filtered);
@@ -195,6 +175,9 @@ export default function ExploreFarms() {
           <p className="text-muted-foreground">
             Showing {filteredFarms.length} of {farms.length} farms
           </p>
+          <p className="text-sm text-gray-500">
+            Debug: Loading: {loading.toString()}, Farms: {farms.length}, Filtered: {filteredFarms.length}
+          </p>
         </div>
 
         {/* Farm Cards */}
@@ -219,13 +202,16 @@ export default function ExploreFarms() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredFarms.map((farm, index) => (
-              <FarmCard 
-                key={`${farm["Farm Name"]}-${index}`} 
-                farm={farm} 
-                onInvest={handleInvest}
-              />
-            ))}
+            {filteredFarms.map((farm, index) => {
+              console.log('Rendering farm:', farm["Farm Name"], farm);
+              return (
+                <FarmCard 
+                  key={`${farm["Farm Name"]}-${index}`} 
+                  farm={farm} 
+                  onInvest={handleInvest}
+                />
+              );
+            })}
           </div>
         )}
       </div>
