@@ -155,7 +155,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
     user: state.user ? {
       ...state.user,
       connectedWallet: !state.user.connectedWallet,
-      walletAddress: !state.user.connectedWallet ? 'ALGO_TEST_...1234' : undefined
+      walletAddress: !state.user.connectedWallet ? 'E2SHORA4VGLYFF34ET7IPSU4BVOEVM4LM7EJQGNB2GNZY7PJNMQWKGRS4A' : undefined
     } : null
   })),
 

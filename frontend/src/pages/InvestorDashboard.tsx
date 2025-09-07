@@ -413,7 +413,7 @@ export default function InvestorDashboard() {
         onClose={() => setIsInvestmentModalOpen(false)}
         farm={selectedFarm}
         onInvest={handleInvest}
-        userEmail={user?.email}
+        userWalletAddress={user?.walletAddress}
       />
 
       <FarmDetailsModal
