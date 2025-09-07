@@ -77,9 +77,10 @@ export default function ExploreFarms() {
 
     // Insurance filter
     if (insuranceFilter !== "all") {
-      filtered = filtered.filter(farm => 
-        insuranceFilter === "insured" ? farm["Insurance Enabled"] : !farm["Insurance Enabled"]
-      );
+      filtered = filtered.filter(farm => {
+        const hasInsurance = farm["Insurance Enabled"] === true;
+        return insuranceFilter === "insured" ? hasInsurance : !hasInsurance;
+      });
     }
 
     setFilteredFarms(filtered);

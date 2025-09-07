@@ -44,7 +44,7 @@ export function FarmCard({ farm, onInvest }: FarmCardProps) {
       <CardContent className="space-y-4">
         {/* Farm Image */}
         <div className="aspect-video bg-gradient-to-br from-green-100 to-green-200 rounded-lg flex items-center justify-center">
-          {farm["Farm Images"] && farm["Farm Images"].length > 0 ? (
+          {farm["Farm Images"] && Array.isArray(farm["Farm Images"]) && farm["Farm Images"].length > 0 ? (
             <img 
               src={farm["Farm Images"][0]} 
               alt={farm["Farm Name"]}
@@ -56,7 +56,7 @@ export function FarmCard({ farm, onInvest }: FarmCardProps) {
               }}
             />
           ) : null}
-          <div className={`text-center text-green-600 ${farm["Farm Images"] && farm["Farm Images"].length > 0 ? 'hidden' : ''}`}>
+          <div className={`text-center text-green-600 ${farm["Farm Images"] && Array.isArray(farm["Farm Images"]) && farm["Farm Images"].length > 0 ? 'hidden' : ''}`}>
             <div className="text-4xl mb-2">🌾</div>
             <p className="text-sm font-medium">Farm Image</p>
           </div>

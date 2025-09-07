@@ -157,7 +157,19 @@ def get_farms():
                 try:
                     with open(filepath, 'r') as f:
                         farm_data = json.load(f)
-                        farms.append(farm_data)
+                        
+                        # Handle different data structures
+                        if isinstance(farm_data, dict):
+                            # If the file contains a "farms" array, extract those farms
+                            if "farms" in farm_data and isinstance(farm_data["farms"], list):
+                                farms.extend(farm_data["farms"])
+                            # If it's a single farm object, add it directly
+                            elif "Farm Name" in farm_data:
+                                farms.append(farm_data)
+                        # If it's already a list, extend the farms list
+                        elif isinstance(farm_data, list):
+                            farms.extend(farm_data)
+                            
                 except (json.JSONDecodeError, IOError) as e:
                     print(f"Error reading {filename}: {e}")
                     continue
