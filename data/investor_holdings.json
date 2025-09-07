@@ -12,8 +12,8 @@
     "Est. Value": 59250.0,
     "P&L": 0.0,
     "P&L Percentage": 0.0,
-    "Last Payout": null,
-    "Total Payouts Received": 0
+    "Last Payout": "2024-08-15",
+    "Total Payouts Received": 3555.0
   },
   {
     "Investor Email": "sarah.chen@email.com",
@@ -28,8 +28,8 @@
     "Est. Value": 6250,
     "P&L": 0,
     "P&L Percentage": 0,
-    "Last Payout": null,
-    "Total Payouts Received": 0
+    "Last Payout": "2024-08-15",
+    "Total Payouts Received": 375.0
   },
   {
     "Investor Email": "mike.wilson@email.com",
@@ -44,8 +44,8 @@
     "Est. Value": 20000,
     "P&L": 0,
     "P&L Percentage": 0,
-    "Last Payout": null,
-    "Total Payouts Received": 0
+    "Last Payout": "2024-11-20",
+    "Total Payouts Received": 1200.0
   },
   {
     "Investor Email": "lisa.garcia@email.com",
@@ -60,8 +60,8 @@
     "Est. Value": 15000,
     "P&L": 0,
     "P&L Percentage": 0,
-    "Last Payout": null,
-    "Total Payouts Received": 0
+    "Last Payout": "2024-11-20",
+    "Total Payouts Received": 900.0
   },
   {
     "Investor Email": "test@example.com",
@@ -76,8 +76,8 @@
     "Est. Value": 125.0,
     "P&L": 0,
     "P&L Percentage": 0,
-    "Last Payout": null,
-    "Total Payouts Received": 0
+    "Last Payout": "2024-08-15",
+    "Total Payouts Received": 7.5
   },
   {
     "Holding ID": "holding_1757255242",
@@ -94,8 +94,8 @@
     "Est. Value": 30,
     "P&L": 0,
     "P&L Percentage": 0,
-    "Last Payout": null,
-    "Total Payouts Received": 0
+    "Last Payout": "2024-12-01",
+    "Total Payouts Received": 2.25
   },
   {
     "Holding ID": "holding_1757255403",
@@ -112,8 +112,8 @@
     "Est. Value": 10,
     "P&L": 0,
     "P&L Percentage": 0,
-    "Last Payout": null,
-    "Total Payouts Received": 0
+    "Last Payout": "2024-12-01",
+    "Total Payouts Received": 0.75
   },
   {
     "Holding ID": "holding_1757255711",
@@ -130,8 +130,8 @@
     "Est. Value": 5,
     "P&L": 0,
     "P&L Percentage": 0,
-    "Last Payout": null,
-    "Total Payouts Received": 0
+    "Last Payout": "2024-09-15",
+    "Total Payouts Received": 0.4
   },
   {
     "Holding ID": "holding_1757255745",
@@ -148,7 +148,7 @@
     "Est. Value": 600,
     "P&L": 0,
     "P&L Percentage": 0,
-    "Last Payout": null,
-    "Total Payouts Received": 0
+    "Last Payout": "2024-10-20",
+    "Total Payouts Received": 48.0
   }
 ]
