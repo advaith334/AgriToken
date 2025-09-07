@@ -84,10 +84,21 @@ class FarmTokenization:
     def tokenize_farm(self, farm_name, token_number, unit_name, wallet_address):
         """Create a farm asset on Algorand blockchain"""
         try:
+            # Create a proper account object for algokit_utils
+            from algokit_utils import Account, AccountManager
+            sender_account = Account(
+                address=self.deployer.address,
+                private_key=self.deployer.private_key
+            )
+
+            # Register the signer with the account manager
+            account_manager = AccountManager(self.algorand_client)
+            account_manager.set_signer(self.deployer.address, sender_account)
+
             # Create asset using algokit_utils with deployer as sender
             asset_result = self.algorand_client.send.asset_create(
                 algokit_utils.AssetCreateParams(
-                    sender=self.deployer.address,
+                    sender=self.deployer.address,  # Use address string
                     total=token_number,
                     decimals=0,
                     default_frozen=False,
@@ -303,9 +314,18 @@ def transfer_assets():
                 }), 400
 
         asset_id = json_data["asset_id"]
-        sender_address = json_data["sender_address"]
-        receiver_address = json_data["receiver_address"]
+        sender_address = json_data["sender_address"].strip()
+        receiver_address = json_data["receiver_address"].strip()
         amount = json_data["amount"]
+
+        # Debug: Log the exact request data
+        print(f"=== TRANSFER ASSETS REQUEST ===")
+        print(f"Raw JSON data: {json_data}")
+        print(f"Sender address: '{sender_address}' (length: {len(sender_address)})")
+        print(f"Receiver address: '{receiver_address}' (length: {len(receiver_address)})")
+        print(f"Asset ID: {asset_id}")
+        print(f"Amount: {amount}")
+        print(f"=================================")
 
         # Validate amount
         if not isinstance(amount, int) or amount <= 0:
@@ -314,7 +334,7 @@ def transfer_assets():
                 'error': 'Amount must be a positive integer'
             }), 400
 
-        # Create farm tokenization instance
+        # Create farm tokenization instance for real blockchain transactions
         try:
             farm_tokenization = FarmTokenization()
         except Exception as e:
@@ -323,40 +343,53 @@ def transfer_assets():
                 'error': f'Failed to initialize blockchain connection: {str(e)}'
             }), 500
 
-        # Perform asset transfer
+        # Perform real asset transfer using direct algosdk
         try:
-            # Check if we're using a test account
-            if farm_tokenization.deployer.address == 'TEST_ADDRESS_FOR_INVALID_MNEMONIC':
-                # Simulate successful transfer for testing
-                import time
-                simulated_tx_id = f"TEST_TX_{int(time.time())}"
-                return jsonify({
-                    'success': True,
-                    'message': f'Successfully transferred {amount} tokens (SIMULATED)',
-                    'transaction_id': simulated_tx_id,
-                    'asset_id': asset_id,
-                    'amount': amount,
-                    'receiver': receiver_address
-                })
-            else:
-                # Real blockchain transaction
-                txn_result = farm_tokenization.algorand_client.send.asset_transfer(
-                    algokit_utils.AssetTransferParams(
-                        sender=farm_tokenization.deployer.address,  # Using deployer as sender for now
-                        asset_id=asset_id,
-                        receiver=receiver_address,
-                        amount=amount,
-                    )
-                )
+            # Import algosdk components
+            from algosdk import v2client, transaction
 
-                return jsonify({
-                    'success': True,
-                    'message': f'Successfully transferred {amount} tokens',
-                    'transaction_id': txn_result.tx_id,
-                    'asset_id': asset_id,
-                    'amount': amount,
-                    'receiver': receiver_address
-                })
+            # Debug: Print all values before creating transaction
+            print(f"DEBUG - Sender address: '{farm_tokenization.deployer.address}' (length: {len(farm_tokenization.deployer.address)})")
+            print(f"DEBUG - Receiver address: '{receiver_address}' (length: {len(receiver_address)})")
+            print(f"DEBUG - Asset ID: {asset_id} (type: {type(asset_id)})")
+            print(f"DEBUG - Amount: {amount} (type: {type(amount)})")
+
+            # Create algod client for TestNet
+            algod_client = v2client.algod.AlgodClient(
+                algod_token="",
+                algod_address="https://testnet-api.algonode.cloud"
+            )
+
+            # Get suggested parameters
+            params = algod_client.suggested_params()
+
+            # Create asset transfer transaction
+            txn = transaction.AssetTransferTxn(
+                sender=farm_tokenization.deployer.address,
+                sp=params,
+                receiver=receiver_address,
+                amt=amount,
+                index=int(asset_id)
+            )
+
+            # Sign the transaction
+            signed_txn = txn.sign(farm_tokenization.deployer.private_key)
+
+            # Submit the transaction
+            txid = algod_client.send_transaction(signed_txn)
+
+            # Wait for confirmation
+            confirmed_txn = transaction.wait_for_confirmation(algod_client, txid, 4)
+
+            return jsonify({
+                'success': True,
+                'message': f'Successfully transferred {amount} tokens on-chain',
+                'transaction_id': txid,
+                'asset_id': asset_id,
+                'amount': amount,
+                'receiver': receiver_address,
+                'confirmed_round': confirmed_txn.get('confirmed-round')
+            })
 
         except Exception as e:
             return jsonify({

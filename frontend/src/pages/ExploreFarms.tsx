@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Filter, MapPin, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { FarmData } from "@/types/farm";
+import { useAppStore } from "@/lib/store";
 
 export default function ExploreFarms() {
   const [farms, setFarms] = useState<FarmData[]>([]);
@@ -19,6 +20,7 @@ export default function ExploreFarms() {
   const [selectedFarm, setSelectedFarm] = useState<FarmData | null>(null);
   const [isInvestmentModalOpen, setIsInvestmentModalOpen] = useState(false);
   const { toast } = useToast();
+  const { user } = useAppStore();
 
   // Load farm data
   useEffect(() => {
@@ -249,7 +251,7 @@ export default function ExploreFarms() {
           onClose={handleCloseInvestmentModal}
           farm={selectedFarm}
           onInvest={handleInvestmentComplete}
-          userWalletAddress="DEMO_INVESTOR_WALLET_ADDRESS" // This should come from user authentication
+          userWalletAddress={user?.walletAddress}
         />
       </div>
     </div>
