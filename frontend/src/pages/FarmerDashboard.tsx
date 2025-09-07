@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -47,6 +48,7 @@ interface Farm {
 export default function FarmerDashboard() {
   const { user, distributions, addDistribution } = useAppStore();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isSimulating, setIsSimulating] = useState(false);
   const [userFarms, setUserFarms] = useState<Farm[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -352,7 +354,11 @@ export default function FarmerDashboard() {
         <TabsContent value="farms" className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-semibold">My Farms</h2>
-            <Button variant="hero" className="gap-2">
+            <Button 
+              variant="hero" 
+              className="gap-2"
+              onClick={() => navigate('/farmer/add')}
+            >
               <Plus className="h-4 w-4" />
               Add Farm
             </Button>
@@ -368,7 +374,11 @@ export default function FarmerDashboard() {
               <Card>
                 <CardContent className="text-center p-8">
                   <p className="text-muted-foreground mb-4">No farms found for your account.</p>
-                  <Button variant="hero" className="gap-2">
+                  <Button 
+                    variant="hero" 
+                    className="gap-2"
+                    onClick={() => navigate('/farmer/add')}
+                  >
                     <Plus className="h-4 w-4" />
                     Add Your First Farm
                   </Button>

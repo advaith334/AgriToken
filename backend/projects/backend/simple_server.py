@@ -34,6 +34,39 @@ class PayoutRequest(BaseModel):
     payout_date: str
     description: str
 
+class CreateFarmRequest(BaseModel):
+    "Farm ID": str
+    "Farm Name": str
+    "Farm Website": str
+    "Farm Email": str
+    "Farm Phone": str
+    "Farmer Name": str
+    "Farmer Email": str
+    "Wallet Address": str
+    "Farm Size (Acres)": int
+    "Crop Type": str
+    "Farm Location": str
+    "Number of Tokens": int
+    "Tokens Sold": int
+    "Tokens Available": int
+    "Token Name": str
+    "Token Unit": str
+    "Price per Token (USD)": float
+    "ASA ID": str
+    "Est. APY": float
+    "Expected Yield /unit": int
+    "Harvest Date": str
+    "Payout Method": str
+    "Insurance Enabled": bool
+    "Insurance Type": str
+    "Verification Method": str
+    "Farm Images": list
+    "Historical Yield": list
+    "Local Currency": str
+    "Farm Status": str
+    "Created At": str
+    "Last Updated": str
+
 @app.get("/")
 async def root():
     return {"message": "AgriToken Backend API is running"}
@@ -345,6 +378,55 @@ async def simulate_payout(request: PayoutRequest):
         raise
     except Exception as e:
         print(f"Unexpected error simulating payout: {e}")
+        raise HTTPException(
+            status_code=500, 
+            detail="An unexpected error occurred. Please try again."
+        )
+
+@app.post("/api/farms")
+async def create_farm(farm_data: dict):
+    try:
+        # Path to the farm data file
+        farm_data_path = "../../../data/farm_info/langs_farm.json"
+        
+        # Load existing farm data
+        if os.path.exists(farm_data_path):
+            with open(farm_data_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        else:
+            os.makedirs(os.path.dirname(farm_data_path), exist_ok=True)
+            data = {"farms": []}
+        
+        # Check if farm ID already exists
+        existing_farm_ids = [farm.get("Farm ID", "") for farm in data["farms"]]
+        if farm_data.get("Farm ID") in existing_farm_ids:
+            raise HTTPException(
+                status_code=400, 
+                detail="Farm ID already exists. Please try again."
+            )
+        
+        # Add new farm to the list
+        data["farms"].append(farm_data)
+        
+        # Save updated data
+        with open(farm_data_path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+        
+        return {
+            "message": "Farm created successfully",
+            "farm": {
+                "id": farm_data.get("Farm ID"),
+                "name": farm_data.get("Farm Name"),
+                "farmer": farm_data.get("Farmer Name"),
+                "location": farm_data.get("Farm Location"),
+                "crop": farm_data.get("Crop Type")
+            }
+        }
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Unexpected error creating farm: {e}")
         raise HTTPException(
             status_code=500, 
             detail="An unexpected error occurred. Please try again."
