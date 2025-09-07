@@ -83,14 +83,14 @@ export default function Signup() {
         const error = await response.json();
         toast({
           title: 'Signup failed',
-          description: error.message || 'An error occurred while creating your account.',
+          description: error.detail || 'An error occurred while creating your account.',
           variant: 'destructive'
         });
       }
     } catch (error) {
       toast({
         title: 'Network error',
-        description: 'Unable to connect to the server. Please try again.',
+        description: 'Unable to connect to the server. Please make sure the backend server is running.',
         variant: 'destructive'
       });
     } finally {
@@ -98,12 +98,18 @@ export default function Signup() {
     }
   };
 
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const isFormValid = () => {
     return (
       formData.firstName.length > 0 &&
       formData.lastName.length > 0 &&
       formData.email.length > 0 &&
-      formData.password.length > 0 &&
+      isValidEmail(formData.email) &&
+      formData.password.length >= 6 &&
       formData.walletAddress.length > 0 &&
       confirmPassword.length > 0 &&
       formData.password === confirmPassword
@@ -172,7 +178,11 @@ export default function Signup() {
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
                 required
+                className={formData.email.length > 0 && !isValidEmail(formData.email) ? "border-red-500" : ""}
               />
+              {formData.email.length > 0 && !isValidEmail(formData.email) && (
+                <div className="text-red-500 text-sm">Please enter a valid email address</div>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -196,7 +206,11 @@ export default function Signup() {
                 value={formData.password}
                 onChange={(e) => handleInputChange('password', e.target.value)}
                 required
+                className={formData.password.length > 0 && formData.password.length < 6 ? "border-red-500" : ""}
               />
+              {formData.password.length > 0 && formData.password.length < 6 && (
+                <div className="text-red-500 text-sm">Password must be at least 6 characters long</div>
+              )}
             </div>
 
             <div className="space-y-2">
