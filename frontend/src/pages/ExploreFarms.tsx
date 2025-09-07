@@ -255,6 +255,7 @@ export default function ExploreFarms() {
           farm={selectedFarm}
           onInvest={handleInvestmentComplete}
           userWalletAddress={user?.walletAddress}
+          userEmail={user?.email}
         />
       </div>
     </div>

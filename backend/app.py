@@ -342,6 +342,165 @@ def get_farms():
             'error': f'Failed to load farm data: {str(e)}'
         }), 500
 
+@app.route('/investor-holdings', methods=['GET'])
+def get_investor_holdings():
+    """Get all investor holdings"""
+    try:
+        import os
+        import json
+
+        holdings = []
+        holdings_file = os.path.join(os.path.dirname(__file__), '..', 'data', 'investor_holdings.json')
+
+        if os.path.exists(holdings_file):
+            try:
+                with open(holdings_file, 'r') as f:
+                    data = json.load(f)
+                    # Handle both formats: direct array or wrapped in "holdings" property
+                    if isinstance(data, list):
+                        holdings = data
+                    elif isinstance(data, dict) and "holdings" in data:
+                        holdings = data["holdings"]
+                    else:
+                        holdings = []
+            except (json.JSONDecodeError, IOError) as e:
+                print(f"Error reading investor holdings: {e}")
+                holdings = []
+
+        return jsonify(holdings)
+
+    except Exception as e:
+        return jsonify({
+            'error': f'Failed to load investor holdings: {str(e)}'
+        }), 500
+
+@app.route('/investor-holdings', methods=['POST'])
+def add_investor_holding():
+    """Add a new investor holding"""
+    try:
+        import os
+        import json
+        from datetime import datetime
+
+        json_data = request.get_json()
+
+        if not json_data:
+            return jsonify({
+                'success': False,
+                'error': 'No data provided'
+            }), 400
+
+        # Get farm data to populate missing fields
+        farm_id = json_data.get("farm_id", "")
+        farm_data = None
+
+        # Try to get farm data using the same logic as /farms endpoint
+        try:
+            farms = []
+            if os.path.exists(DATA_DIR):
+                for filename in os.listdir(DATA_DIR):
+                    if filename.endswith('.json'):
+                        filepath = os.path.join(DATA_DIR, filename)
+                        try:
+                            with open(filepath, 'r') as f:
+                                farm_data = json.load(f)
+
+                                # Handle different data structures
+                                if isinstance(farm_data, dict):
+                                    # If the file contains a "farms" array, extract those farms
+                                    if "farms" in farm_data and isinstance(farm_data["farms"], list):
+                                        farms.extend(farm_data["farms"])
+                                    # If it's a single farm object, add it directly
+                                    elif "Farm Name" in farm_data:
+                                        farms.append(farm_data)
+                                # If it's already a list, extend the farms list
+                                elif isinstance(farm_data, list):
+                                    farms.extend(farm_data)
+                        except (json.JSONDecodeError, IOError) as e:
+                            print(f"Error reading {filename}: {e}")
+                            continue
+
+            # Find the specific farm
+            for farm in farms:
+                if farm.get("Farm ID") == farm_id:
+                    farm_data = farm
+                    break
+        except Exception as e:
+            print(f"Error loading farm data: {e}")
+
+        # Get user data to populate investor name
+        investor_email = json_data.get("investor_email", "")
+        investor_name = "Unknown Investor"
+
+        try:
+            user_info_file = os.path.join(os.path.dirname(__file__), '..', 'data', 'user_info', 'signup_info.json')
+            if os.path.exists(user_info_file):
+                with open(user_info_file, 'r') as f:
+                    user_data = json.load(f)
+                    for user in user_data.get("users", []):
+                        if user.get("User Email") == investor_email:
+                            investor_name = f"{user.get('User First Name', '')} {user.get('User Last Name', '')}".strip()
+                            break
+        except Exception as e:
+            print(f"Error loading user data: {e}")
+
+        # Create holding data
+        holding = {
+            "Holding ID": f"holding_{int(datetime.now().timestamp())}",
+            "Investor Email": investor_email,
+            "Investor Name": investor_name,
+            "Farm ID": farm_id,
+            "Farm Name": farm_data.get("Farm Name", "Unknown Farm") if farm_data else "Unknown Farm",
+            "Asset ID": json_data.get("asset_id", ""),
+            "ASA ID": json_data.get("asset_id", ""),
+            "Tokens Owned": json_data.get("tokens_owned", 0),
+            "Cost Basis": json_data.get("cost_basis", 0),
+            "Purchase Date": datetime.now().isoformat(),
+            "Token Price": json_data.get("cost_basis", 0) / json_data.get("tokens_owned", 1) if json_data.get("tokens_owned", 0) > 0 else 0,
+            "Est. Value": json_data.get("cost_basis", 0),  # Initially same as cost basis
+            "P&L": 0,  # Initially 0
+            "P&L Percentage": 0,  # Initially 0
+            "Last Payout": None,
+            "Total Payouts Received": 0
+        }
+
+        # Load existing holdings
+        holdings_file = os.path.join(os.path.dirname(__file__), '..', 'data', 'investor_holdings.json')
+        holdings = []
+
+        if os.path.exists(holdings_file):
+            try:
+                with open(holdings_file, 'r') as f:
+                    data = json.load(f)
+                    # Handle both formats: direct array or wrapped in "holdings" property
+                    if isinstance(data, list):
+                        holdings = data
+                    elif isinstance(data, dict) and "holdings" in data:
+                        holdings = data["holdings"]
+                    else:
+                        holdings = []
+            except (json.JSONDecodeError, IOError):
+                holdings = []
+
+        # Add new holding
+        holdings.append(holding)
+
+        # Save back to file
+        os.makedirs(os.path.dirname(holdings_file), exist_ok=True)
+        with open(holdings_file, 'w') as f:
+            json.dump(holdings, f, indent=2)
+
+        return jsonify({
+            'success': True,
+            'holding': holding
+        })
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Failed to add investor holding: {str(e)}'
+        }), 500
+
 @app.route('/set_mnemonic', methods=['POST'])
 def set_mnemonic():
     """Set the mnemonic for blockchain operations"""

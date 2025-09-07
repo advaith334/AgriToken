@@ -15,9 +15,10 @@ interface InvestmentModalProps {
   farm: FarmData | null;
   onInvest: (farm: FarmData, tokens: number, totalCost: number) => void;
   userWalletAddress?: string;
+  userEmail?: string;
 }
 
-export default function InvestmentModal({ isOpen, onClose, farm, onInvest, userWalletAddress }: InvestmentModalProps) {
+export default function InvestmentModal({ isOpen, onClose, farm, onInvest, userWalletAddress, userEmail }: InvestmentModalProps) {
   const [tokensToBuy, setTokensToBuy] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isMnemonicModalOpen, setIsMnemonicModalOpen] = useState(false);
@@ -120,6 +121,31 @@ export default function InvestmentModal({ isOpen, onClose, farm, onInvest, userW
         const result = await response.json();
         
         if (result.success) {
+          // Save investor holding
+          try {
+            const holdingResponse = await fetch('http://localhost:5000/investor-holdings', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                investor_email: userEmail || userWalletAddress, // Use email if available, fallback to wallet address
+                farm_id: farm["Farm ID"],
+                asset_id: farm["Asset ID"],
+                tokens_owned: tokens,
+                cost_basis: totalCost
+              }),
+            });
+
+            if (holdingResponse.ok) {
+              console.log('Investor holding saved successfully');
+            } else {
+              console.error('Failed to save investor holding');
+            }
+          } catch (error) {
+            console.error('Error saving investor holding:', error);
+          }
+
           onInvest(farm, tokens, totalCost);
           
           toast({
