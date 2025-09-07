@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { DollarSign, Coins, TrendingUp } from "lucide-react";
 import { FarmData } from "@/types/farm";
+import MnemonicModal from "./MnemonicModal";
 
 interface InvestmentModalProps {
   isOpen: boolean;
@@ -19,6 +20,8 @@ interface InvestmentModalProps {
 export default function InvestmentModal({ isOpen, onClose, farm, onInvest, userWalletAddress }: InvestmentModalProps) {
   const [tokensToBuy, setTokensToBuy] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isMnemonicModalOpen, setIsMnemonicModalOpen] = useState(false);
+  const [mnemonicSet, setMnemonicSet] = useState(false);
   const { toast } = useToast();
 
   if (!farm) return null;
@@ -27,6 +30,30 @@ export default function InvestmentModal({ isOpen, onClose, farm, onInvest, userW
   const availableTokens = farm["Number of Tokens"];
   const totalCost = parseFloat(tokensToBuy) * pricePerToken || 0;
   const estimatedAnnualReturn = totalCost * 0.1; // Assuming 10% APY for now
+
+  const handleMnemonicSubmit = async (mnemonic: string): Promise<boolean> => {
+    try {
+      const response = await fetch('http://localhost:5000/set_mnemonic', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ mnemonic }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setMnemonicSet(true);
+          return true;
+        }
+      }
+      return false;
+    } catch (error) {
+      console.error('Error setting mnemonic:', error);
+      return false;
+    }
+  };
 
   const handleInvest = async () => {
     const tokens = parseInt(tokensToBuy);
@@ -64,6 +91,12 @@ export default function InvestmentModal({ isOpen, onClose, farm, onInvest, userW
         description: 'This farm has not been tokenized yet.',
         variant: 'destructive'
       });
+      return;
+    }
+
+    // Check if mnemonic is set, if not, prompt for it
+    if (!mnemonicSet) {
+      setIsMnemonicModalOpen(true);
       return;
     }
 
@@ -173,6 +206,12 @@ export default function InvestmentModal({ isOpen, onClose, farm, onInvest, userW
                   <span className="text-sm text-muted-foreground">Asset ID</span>
                   <span className="font-medium text-xs">{farm["Asset ID"] || "Not tokenized"}</span>
                 </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">Wallet Status</span>
+                  <span className={`font-medium text-xs ${mnemonicSet ? 'text-green-600' : 'text-orange-600'}`}>
+                    {mnemonicSet ? 'Connected' : 'Not Connected'}
+                  </span>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -254,12 +293,19 @@ export default function InvestmentModal({ isOpen, onClose, farm, onInvest, userW
               ) : (
                 <>
                   <DollarSign className="h-4 w-4" />
-                  Invest ${totalCost.toLocaleString()}
+                  {mnemonicSet ? `Invest $${totalCost.toLocaleString()}` : 'Connect Wallet & Invest'}
                 </>
               )}
             </Button>
           </div>
         </div>
+
+        {/* Mnemonic Modal */}
+        <MnemonicModal
+          isOpen={isMnemonicModalOpen}
+          onClose={() => setIsMnemonicModalOpen(false)}
+          onMnemonicSubmit={handleMnemonicSubmit}
+        />
       </DialogContent>
     </Dialog>
   );
