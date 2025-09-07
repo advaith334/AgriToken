@@ -1,0 +1,15 @@
+{
+  "users": [
+    {
+      "User First Name": "John",
+      "User Last Name": "Doe",
+      "Wallet Address": "PKAQUSHTREQMA7OVUYA5YU2LLEEE54OQMF2AQXPJAFKEPQUEXE7YNI26MQ",
+      "User Email": "john.doe@example.com",
+      "User Password": "password",
+      "User Role": "Farmer",
+      "User Status": "Active",
+      "User Created At": "2021-01-01",
+      "User Updated At": "2021-01-01"
+    }
+  ]
+}

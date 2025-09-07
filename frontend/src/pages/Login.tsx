@@ -1,65 +1,41 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAppStore } from "@/lib/store";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [walletAddress, setWalletAddress] = useState("");
-  const [role, setRole] = useState<'farmer' | 'investor'>('investor');
   
   const navigate = useNavigate();
-  const location = useLocation();
-  const [searchParams] = useSearchParams();
   const { setUser } = useAppStore();
   const { toast } = useToast();
-
-  useEffect(() => {
-    const roleParam = searchParams.get('role') as 'farmer' | 'investor';
-    if (roleParam) {
-      setRole(roleParam);
-    }
-  }, [searchParams]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!isLogin && password !== confirmPassword) {
-      toast({
-        title: 'Passwords do not match',
-        description: 'Please ensure the two passwords are the same before continuing.',
-      });
-      return;
-    }
-
-    // Demo authentication / simple user creation
+    // Demo authentication - in a real app, this would validate against the backend
     const newUser = {
-      id: role === 'farmer' ? 'farmer-demo' : 'investor-demo',
-      name: isLogin ? (role === 'farmer' ? 'Demo Farmer' : 'Demo Investor') : `${firstName} ${lastName}`,
+      id: 'demo-user',
+      name: 'Demo User',
       email,
-      role,
+      role: 'investor' as const,
       connectedWallet: false,
-      walletAddress: !isLogin ? walletAddress : undefined
     };
 
     setUser(newUser);
     
     toast({
-      title: isLogin ? `Logged in as ${role}` : 'Account created',
+      title: 'Logged in successfully',
       description: `Welcome to AgriToken, ${newUser.name}!`,
     });
 
     // Navigate to appropriate dashboard
-    navigate(`/${role}`);
+    navigate('/investor');
   };
 
   const handleDemoLogin = (demoRole: 'farmer' | 'investor') => {
@@ -92,17 +68,7 @@ export default function Login() {
     navigate(`/${demoRole}`);
   };
 
-  const isLogin = location.pathname === '/login';
   const isLoginValid = email.length > 0 && password.length > 0;
-  const isSignupValid = (
-    email.length > 0 &&
-    password.length > 0 &&
-    confirmPassword.length > 0 &&
-    password === confirmPassword &&
-    firstName.length > 0 &&
-    lastName.length > 0 &&
-    walletAddress.length > 0
-  );
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-subtle p-4">
@@ -110,26 +76,11 @@ export default function Login() {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Welcome to AgriToken</CardTitle>
           <CardDescription>
-            {isLogin ? 'Sign in to your account' : 'Create a new account'}
+            Sign in to your account
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
-              <div className="space-y-2">
-                <Label htmlFor="role">I am a</Label>
-                <Select value={role} onValueChange={(value: 'farmer' | 'investor') => setRole(value)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="farmer">Farmer</SelectItem>
-                    <SelectItem value="investor">Investor</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -141,46 +92,6 @@ export default function Login() {
                 required
               />
             </div>
-
-            {!isLogin && (
-              <>
-              <div className="space-y-2">
-                <Label htmlFor="firstName">First name</Label>
-                <Input
-                  id="firstName"
-                  type="text"
-                  placeholder="Enter your first name"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last name</Label>
-                <Input
-                  id="lastName"
-                  type="text"
-                  placeholder="Enter your last name"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="wallet">Pera wallet public address</Label>
-                <Input
-                  id="wallet"
-                  type="text"
-                  placeholder="Enter your Pera wallet address"
-                  value={walletAddress}
-                  onChange={(e) => setWalletAddress(e.target.value)}
-                  required
-                />
-              </div>
-              </>
-            )}
 
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
@@ -194,34 +105,17 @@ export default function Login() {
               />
             </div>
 
-            {!isLogin && (
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm password</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="Re-enter your password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                />
-                {confirmPassword.length > 0 && password !== confirmPassword && (
-                  <div className="text-red-500 text-sm">Passwords do not match</div>
-                )}
-              </div>
-            )}
-
-            <Button type="submit" className="w-full" variant="hero" disabled={isLogin ? !isLoginValid : !isSignupValid}>
-              {isLogin ? 'Sign In' : 'Sign Up'}
+            <Button type="submit" className="w-full" variant="hero" disabled={!isLoginValid}>
+              Sign In
             </Button>
           </form>
 
           <Button
             variant="ghost"
             className="w-full"
-            onClick={() => navigate(isLogin ? '/signup' : '/login')}
+            onClick={() => navigate('/signup')}
           >
-            {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+            Don't have an account? Sign up
           </Button>
         </CardContent>
       </Card>
