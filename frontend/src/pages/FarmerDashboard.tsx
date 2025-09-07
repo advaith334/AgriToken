@@ -357,10 +357,10 @@ export default function FarmerDashboard() {
             <Button 
               variant="hero" 
               className="gap-2"
-              onClick={() => navigate('/farmer/add')}
+              onClick={() => navigate('/farmer/add-listing')}
             >
               <Plus className="h-4 w-4" />
-              Add Farm
+              Add Farm Listing
             </Button>
           </div>
 

@@ -205,10 +205,9 @@ export default function InvestorDashboard() {
       </div>
 
       <Tabs defaultValue="portfolio" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
           <TabsTrigger value="payouts">Payouts</TabsTrigger>
-          <TabsTrigger value="explore">Explore</TabsTrigger>
         </TabsList>
 
         <TabsContent value="portfolio" className="space-y-6">
