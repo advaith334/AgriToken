@@ -455,6 +455,8 @@ def add_investor_holding():
             "ASA ID": json_data.get("asset_id", ""),
             "Tokens Owned": json_data.get("tokens_owned", 0),
             "Cost Basis": json_data.get("cost_basis", 0),
+            "Insurance Cost": json_data.get("insurance_cost", 0),
+            "Is Insured": json_data.get("is_insured", False),
             "Purchase Date": datetime.now().isoformat(),
             "Token Price": json_data.get("cost_basis", 0) / json_data.get("tokens_owned", 1) if json_data.get("tokens_owned", 0) > 0 else 0,
             "Est. Value": json_data.get("cost_basis", 0),  # Initially same as cost basis

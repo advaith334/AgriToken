@@ -2,10 +2,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { DollarSign, Coins, TrendingUp } from "lucide-react";
+import { DollarSign, Coins, TrendingUp, Shield } from "lucide-react";
 import { FarmData } from "@/types/farm";
 import MnemonicModal from "./MnemonicModal";
 
@@ -23,14 +24,17 @@ export default function InvestmentModal({ isOpen, onClose, farm, onInvest, userW
   const [isLoading, setIsLoading] = useState(false);
   const [isMnemonicModalOpen, setIsMnemonicModalOpen] = useState(false);
   const [mnemonicSet, setMnemonicSet] = useState(false);
+  const [isInsured, setIsInsured] = useState(false);
   const { toast } = useToast();
 
   if (!farm) return null;
 
   const pricePerToken = farm["Price per Token (USD)"];
   const availableTokens = farm["Number of Tokens"];
-  const totalCost = parseFloat(tokensToBuy) * pricePerToken || 0;
-  const estimatedAnnualReturn = totalCost * 0.1; // Assuming 10% APY for now
+  const baseCost = parseFloat(tokensToBuy) * pricePerToken || 0;
+  const insuranceCost = isInsured ? baseCost * 0.15 : 0;
+  const totalCost = baseCost + insuranceCost;
+  const estimatedAnnualReturn = baseCost * 0.1; // Assuming 10% APY for now
 
   const handleMnemonicSubmit = async (mnemonic: string): Promise<boolean> => {
     try {
@@ -133,7 +137,9 @@ export default function InvestmentModal({ isOpen, onClose, farm, onInvest, userW
                 farm_id: farm["Farm ID"],
                 asset_id: farm["Asset ID"],
                 tokens_owned: tokens,
-                cost_basis: totalCost
+                cost_basis: baseCost,
+                insurance_cost: insuranceCost,
+                is_insured: isInsured
               }),
             });
 
@@ -267,6 +273,26 @@ export default function InvestmentModal({ isOpen, onClose, farm, onInvest, userW
               </div>
             </div>
 
+            {/* Insurance Option */}
+            {tokensToBuy && (
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="insurance"
+                    checked={isInsured}
+                    onCheckedChange={(checked) => setIsInsured(checked as boolean)}
+                  />
+                  <Label htmlFor="insurance" className="flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-blue-600" />
+                    <span>Add AgriToken Insurance (+15%)</span>
+                  </Label>
+                </div>
+                <p className="text-sm text-muted-foreground ml-6">
+                  Protect your investment against crop failure, natural disasters, and market volatility.
+                </p>
+              </div>
+            )}
+
             {/* Investment Summary */}
             {tokensToBuy && (
               <Card>
@@ -280,9 +306,22 @@ export default function InvestmentModal({ isOpen, onClose, farm, onInvest, userW
                       <span className="text-sm text-muted-foreground">Price per Token</span>
                       <span className="font-medium">${pricePerToken}</span>
                     </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Base Investment</span>
+                      <span className="font-medium">${baseCost.toLocaleString()}</span>
+                    </div>
+                    {isInsured && (
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground flex items-center gap-1">
+                          <Shield className="h-3 w-3 text-blue-600" />
+                          Insurance (15%)
+                        </span>
+                        <span className="font-medium text-blue-600">${insuranceCost.toLocaleString()}</span>
+                      </div>
+                    )}
                     <div className="border-t pt-2">
                       <div className="flex justify-between">
-                        <span className="font-medium">Total Investment</span>
+                        <span className="font-medium">Total Cost</span>
                         <span className="font-bold text-lg">${totalCost.toLocaleString()}</span>
                       </div>
                     </div>

@@ -11,7 +11,8 @@ import {
   Wallet,
   Calendar,
   Eye,
-  ShoppingCart
+  ShoppingCart,
+  Shield
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { useToast } from "@/hooks/use-toast";
@@ -57,6 +58,8 @@ interface InvestorHolding {
   "Farm Name": string;
   "Tokens Owned": number;
   "Cost Basis": number;
+  "Insurance Cost"?: number;
+  "Is Insured"?: boolean;
   "Purchase Date": string;
   "ASA ID": string;
   "Token Price": number;
@@ -232,6 +235,7 @@ export default function InvestorDashboard() {
                       <th className="text-right p-2">Est. Value</th>
                       <th className="text-right p-2">P&L ($)</th>
                       <th className="text-right p-2">P&L (%)</th>
+                      <th className="text-center p-2">Insurance</th>
                       <th className="text-right p-2">Last Payout</th>
                       <th className="text-center p-2">Actions</th>
                     </tr>
@@ -239,7 +243,7 @@ export default function InvestorDashboard() {
                   <tbody>
                     {investorHoldings.length === 0 ? (
                       <tr>
-                        <td colSpan={9} className="p-8 text-center text-muted-foreground">
+                        <td colSpan={10} className="p-8 text-center text-muted-foreground">
                           No holdings found. Start investing in farms to see your portfolio here.
                         </td>
                       </tr>
@@ -260,6 +264,16 @@ export default function InvestorDashboard() {
                             </td>
                             <td className={`p-2 text-right ${holding["P&L Percentage"] >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                               {holding["P&L Percentage"].toFixed(1)}%
+                            </td>
+                            <td className="p-2 text-center">
+                              {holding["Is Insured"] ? (
+                                <div className="flex items-center justify-center gap-1">
+                                  <Shield className="h-3 w-3 text-blue-600" />
+                                  <span className="text-xs text-blue-600">Insured</span>
+                                </div>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">No</span>
+                              )}
                             </td>
                             <td className="p-2 text-right">
                               {holding["Last Payout"] ? `$${holding["Total Payouts Received"].toLocaleString()}` : "$0"}
