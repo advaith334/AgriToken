@@ -150,5 +150,25 @@
     "P&L Percentage": 0,
     "Last Payout": "2024-10-20",
     "Total Payouts Received": 48.0
+  },
+  {
+    "Holding ID": "holding_1757256922",
+    "Investor Email": "adhvaithkarthikeyan@gmail.com",
+    "Investor Name": "Advaith Karthikeyan",
+    "Farm ID": "farm_745511503",
+    "Farm Name": "Auto Test Farm",
+    "Asset ID": "745511503",
+    "ASA ID": "745511503",
+    "Tokens Owned": 5,
+    "Cost Basis": 40,
+    "Insurance Cost": 6,
+    "Is Insured": true,
+    "Purchase Date": "2025-09-07T10:55:22.364498",
+    "Token Price": 8.0,
+    "Est. Value": 40,
+    "P&L": 0,
+    "P&L Percentage": 0,
+    "Last Payout": null,
+    "Total Payouts Received": 0
   }
 ]

@@ -228,12 +228,6 @@ export default function FarmerDashboard() {
           icon={DollarSign}
           trend={{ value: 8.2, isPositive: true }}
         />
-        <StatCard
-          title="Next Expected Payout"
-          value={nextExpectedPayout}
-          icon={Calendar}
-          subtitle="Est. Sept 15-30"
-        />
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
