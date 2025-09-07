@@ -6,9 +6,6 @@ class FarmTokenization(ARC4Contract):
     # tokenization of farm asset
     @abimethod()
     def tokenize_farm(self, farm_name: String, token_number: UInt64, unit_name: String) -> String:
-        # This is a placeholder function that returns the farm name
-        # In a real implementation, asset creation would be handled by the client
-        # The smart contract would store farm information and validate operations
         return farm_name
     
     # get farm info

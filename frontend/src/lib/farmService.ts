@@ -105,13 +105,13 @@ export const validateUrl = (url: string): boolean => {
 export const generateTokenUnit = (farmName: string, cropType: string): string => {
   const farmAbbr = farmName
     .split(' ')
-    .map(word => word.substring(0, 3).toUpperCase())
+    .map(word => word.substring(0, 2).toUpperCase())
     .join('')
-    .substring(0, 6);
+    .substring(0, 4);
   
-  const cropAbbr = cropType.substring(0, 3).toUpperCase();
+  const cropAbbr = cropType.substring(0, 4).toUpperCase();
   
-  return `${farmAbbr}${cropAbbr}`.substring(0, 10);
+  return `${farmAbbr}${cropAbbr}`.substring(0, 8);
 };
 
 // Calculate total investment value

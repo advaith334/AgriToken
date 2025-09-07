@@ -8,8 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Save, Upload } from "lucide-react";
-import { saveFarmData, validatePeraWalletAddress, validateEmail, generateTokenUnit, FarmData } from "@/lib/farmService";
-import { algorandService, AlgorandService } from "@/lib/algorandService";
+import { validateEmail, generateTokenUnit, FarmData } from "@/lib/farmService";
 
 // Using FarmData interface from farmService
 
@@ -17,8 +16,6 @@ export default function AddFarmListing() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [isWalletConnected, setIsWalletConnected] = useState(false);
-  const [walletPrivateKey, setWalletPrivateKey] = useState<Uint8Array | null>(null);
 
   // Form state
   const [formData, setFormData] = useState<Partial<FarmData>>({
@@ -27,7 +24,7 @@ export default function AddFarmListing() {
     "Farm Email": "",
     "Farm Phone": "",
     "Farmer Name": "",
-    "Wallet Address": "",
+    "Wallet Address": "E2SHORA4VGLYFF34ET7IPSU4BVOEVM4LM7EJQGNB2GNZY7PJNMQWKGRS4A", // Default testnet address
     "Farm Size (Acres)": 0,
     "Crop Type": "",
     "Farm Location": "",
@@ -76,32 +73,6 @@ export default function AddFarmListing() {
     }));
   };
 
-  const connectWallet = async () => {
-    try {
-      // For demo purposes, we'll generate a test account
-      // In a real implementation, you would connect to Pera Wallet or other wallet providers
-      const testAccount = AlgorandService.generateAccount();
-      
-      setWalletPrivateKey(testAccount.privateKey);
-      setFormData(prev => ({
-        ...prev,
-        "Wallet Address": testAccount.address
-      }));
-      setIsWalletConnected(true);
-      
-      toast({
-        title: "Wallet Connected",
-        description: `Connected to wallet: ${testAccount.address.substring(0, 8)}...`,
-      });
-    } catch (error) {
-      console.error('Error connecting wallet:', error);
-      toast({
-        title: "Wallet Connection Failed",
-        description: "Please try again or check your wallet connection.",
-        variant: "destructive"
-      });
-    }
-  };
 
   const validateForm = (): string | null => {
     const requiredFields: (keyof FarmData)[] = [
@@ -156,55 +127,39 @@ export default function AddFarmListing() {
       return;
     }
 
-    if (!isWalletConnected || !walletPrivateKey) {
-      toast({
-        title: "Wallet Not Connected",
-        description: "Please connect your wallet before creating a farm listing.",
-        variant: "destructive"
-      });
-      return;
-    }
 
     setIsLoading(true);
 
     try {
-      // Step 1: Tokenize the farm on Algorand blockchain
+      // Step 1: Send farm data to backend for tokenization
       toast({
         title: "Starting Tokenization",
         description: "Creating farm tokens on Algorand blockchain...",
       });
 
-      const tokenizationResult = await algorandService.tokenizeFarm(
-        formData as FarmData,
-        formData["Wallet Address"]!,
-        walletPrivateKey
-      );
+      const response = await fetch('http://localhost:5000/tokenize_farm', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
 
-      if (!tokenizationResult.success) {
-        throw new Error(tokenizationResult.error || 'Tokenization failed');
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Tokenization failed');
       }
 
-      // Step 2: Save farm data with blockchain information
-      const farmDataWithBlockchain = {
-        ...formData,
-        "Asset ID": tokenizationResult.assetId,
-        "Contract Address": tokenizationResult.contractAddress,
-        "Transaction ID": tokenizationResult.transactionId,
-      } as FarmData & { "Asset ID": number; "Contract Address": string; "Transaction ID": string };
+      // Step 2: Show success message with blockchain information
+      toast({
+        title: "Farm Successfully Tokenized!",
+        description: `Your farm has been tokenized on Algorand! Asset ID: ${result.asset_id}`,
+      });
 
-      const success = await saveFarmData(farmDataWithBlockchain);
+      // Navigate back to farmer options
+      navigate('/farmer/options');
       
-      if (success) {
-        toast({
-          title: "Farm Successfully Tokenized!",
-          description: `Your farm has been tokenized on Algorand! Asset ID: ${tokenizationResult.assetId}`,
-        });
-
-        // Navigate back to farmer options
-        navigate('/farmer/options');
-      } else {
-        throw new Error('Failed to save farm data');
-      }
     } catch (error) {
       console.error('Error in farm tokenization:', error);
       const errorMessage = error instanceof Error ? error.message : 'There was an issue tokenizing your farm. Please try again.';
@@ -390,9 +345,13 @@ export default function AddFarmListing() {
                     id="tokenUnit"
                     value={formData["Token Unit"]}
                     onChange={(e) => handleInputChange("Token Unit", e.target.value)}
-                    placeholder="e.g., GRNACRSBYN"
+                    placeholder="e.g., LANFARWH"
+                    maxLength={8}
                     required
                   />
+                  <p className="text-sm text-muted-foreground">
+                    Maximum 8 characters (Algorand limit)
+                  </p>
                 </div>
               </div>
 
@@ -464,35 +423,21 @@ export default function AddFarmListing() {
             <CardHeader>
               <CardTitle>Wallet & Verification</CardTitle>
               <CardDescription>
-                Your Pera wallet and verification details
+                Your wallet address and verification details
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="walletAddress">Pera Wallet Address *</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="walletAddress"
-                    value={formData["Wallet Address"]}
-                    onChange={(e) => handleInputChange("Wallet Address", e.target.value)}
-                    placeholder="ALGOTESTNETADDRESS9876543210..."
-                    required
-                    disabled={isWalletConnected}
-                  />
-                  <Button
-                    type="button"
-                    variant={isWalletConnected ? "secondary" : "default"}
-                    onClick={connectWallet}
-                    disabled={isLoading}
-                  >
-                    {isWalletConnected ? "Connected" : "Connect Wallet"}
-                  </Button>
-                </div>
+                <Label htmlFor="walletAddress">Wallet Address *</Label>
+                <Input
+                  id="walletAddress"
+                  value={formData["Wallet Address"]}
+                  onChange={(e) => handleInputChange("Wallet Address", e.target.value)}
+                  placeholder="Enter your Algorand wallet address (e.g., E2SHORA4VGLYFF34ET7IPSU4BVOEVM4LM7EJQGNB2GNZY7PJNMQWKGRS4A)"
+                  required
+                />
                 <p className="text-sm text-muted-foreground">
-                  {isWalletConnected 
-                    ? "Wallet connected successfully" 
-                    : "Click 'Connect Wallet' to generate a test wallet or connect your Pera Wallet"
-                  }
+                  Enter your Algorand wallet address where you want to receive the farm tokens
                 </p>
               </div>
 
