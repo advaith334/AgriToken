@@ -1,0 +1,82 @@
+{
+  "farms": [
+    {
+      "Farm ID": "farm_001",
+      "Farm Name": "Green Valley Maize",
+      "Farm Website": "https://greenvalleymaize.com/",
+      "Farm Email": "john.doe@example.com",
+      "Farm Phone": "+1-555-0123",
+      "Farmer Name": "John Doe",
+      "Farmer Email": "john.doe@example.com",
+      "Wallet Address": "PKAQUSHTREQMA7OVUYA5YU2LLEEE54OQMF2AQXPJAFKEPQUEXE7YNI26MQ",
+      "Farm Size (Acres)": 250,
+      "Crop Type": "Maize",
+      "Farm Location": "Nakuru, Kenya",
+      "Number of Tokens": 10000,
+      "Tokens Sold": 10000,
+      "Tokens Available": 0,
+      "Token Name": "GVM",
+      "Token Unit": "GREENVALLEY",
+      "Price per Token (USD)": 12.5,
+      "ASA ID": "89123456",
+      "Est. APY": 12.5,
+      "Expected Yield /unit": 5000,
+      "Harvest Date": "2025-09-30",
+      "Payout Method": "ALGO",
+      "Insurance Enabled": true,
+      "Insurance Type": "Parametric Weather-Based",
+      "Verification Method": "Self-Reported",
+      "Farm Images": [
+        "https://greenvalleymaize.com/images/farm1.jpg"
+      ],
+      "Historical Yield": [
+        4800,
+        5000,
+        5100
+      ],
+      "Local Currency": "USD",
+      "Farm Status": "Active",
+      "Created At": "2024-01-15",
+      "Last Updated": "2025-09-07"
+    },
+    {
+      "Farm ID": "farm_002",
+      "Farm Name": "Sunridge Coffee",
+      "Farm Website": "https://sunridgecoffee.com/",
+      "Farm Email": "info@sunridgecoffee.com",
+      "Farm Phone": "+57-555-0456",
+      "Farmer Name": "Maria Rodriguez",
+      "Farmer Email": "maria@sunridgecoffee.com",
+      "Wallet Address": "SUNRIDGEWALLET1234567890",
+      "Farm Size (Acres)": 120,
+      "Crop Type": "Coffee",
+      "Farm Location": "Huila, Colombia",
+      "Number of Tokens": 5000,
+      "Tokens Sold": 2400,
+      "Tokens Available": 2600,
+      "Token Name": "SRC",
+      "Token Unit": "SUNRIDGE",
+      "Price per Token (USD)": 25,
+      "ASA ID": "56789123",
+      "Est. APY": 12.5,
+      "Expected Yield /unit": 3000,
+      "Harvest Date": "2025-10-15",
+      "Payout Method": "ALGO",
+      "Insurance Enabled": true,
+      "Insurance Type": "Parametric Weather-Based",
+      "Verification Method": "Self-Reported",
+      "Farm Images": [
+        "https://sunridgecoffee.com/images/farm1.jpg"
+      ],
+      "Historical Yield": [
+        2800,
+        3000,
+        3200
+      ],
+      "Local Currency": "USD",
+      "Farm Status": "Active",
+      "Created At": "2024-02-01",
+      "Last Updated": "2024-02-01"
+    }
+  ]
+}
