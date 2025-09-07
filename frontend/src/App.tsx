@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import FarmerDashboard from "./pages/FarmerDashboard";
 import InvestorDashboard from "./pages/InvestorDashboard";
+import AddFarm from "./pages/AddFarm";
 import ExploreFarms from "./pages/ExploreFarms";
 import FarmerOptions from "./pages/FarmerOptions";
 import AddFarmListing from "./pages/AddFarmListing";
@@ -33,6 +34,7 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/farmer" element={<FarmerDashboard />} />
+          <Route path="/farmer/add" element={<AddFarm />} />
           <Route path="/farmer/options" element={<FarmerOptions />} />
           <Route path="/farmer/add-listing" element={<AddFarmListing />} />
           <Route path="/investor" element={<InvestorDashboard />} />

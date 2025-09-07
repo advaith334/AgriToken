@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,17 +27,76 @@ const yieldData = [
   { season: '2024-4', yield: 50 },
 ];
 
-export default function FarmerDashboard() {
-  const navigate = useNavigate();
-  const { user, farms, distributions, addDistribution } = useAppStore();
-  const { toast } = useToast();
-  const [isSimulating, setIsSimulating] = useState(false);
+interface Farm {
+  "Farm ID": string;
+  "Farm Name": string;
+  "Farmer Name": string;
+  "Farmer Email": string;
+  "Farm Size (Acres)": number;
+  "Crop Type": string;
+  "Farm Location": string;
+  "Number of Tokens": number;
+  "Tokens Sold": number;
+  "Tokens Available": number;
+  "Price per Token (USD)": number;
+  "ASA ID": string;
+  "Est. APY": number;
+  "Harvest Date": string;
+  "Farm Status": string;
+}
 
-  const userFarms = farms.filter(farm => farm.farmerId === user?.id);
-  const totalAcres = userFarms.reduce((sum, farm) => sum + farm.acres, 0);
-  const totalTokensSold = userFarms.reduce((sum, farm) => sum + farm.tokensSold, 0);
-  const lastRevenue = userFarms.reduce((sum, farm) => sum + (farm.lastRevenuePerAcre * farm.acres), 0);
-  const nextExpectedPayout = userFarms.reduce((sum, farm) => sum + (farm.expectedRevenuePerAcre * farm.acres * 0.8), 0); // 80% after fees
+export default function FarmerDashboard() {
+  const { user, distributions, addDistribution } = useAppStore();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const [isSimulating, setIsSimulating] = useState(false);
+  const [userFarms, setUserFarms] = useState<Farm[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch farmer's farms from API
+  useEffect(() => {
+    const fetchFarmerFarms = async () => {
+      if (!user?.email) return;
+      
+      console.log('Fetching farms for user:', user.email);
+      
+      try {
+        const response = await fetch(`http://localhost:8000/api/farms/${user.email}`);
+        console.log('API response status:', response.status);
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('API response data:', data);
+          setUserFarms(data.farms || []);
+        } else {
+          const errorText = await response.text();
+          console.error('API error:', response.status, errorText);
+          toast({
+            title: 'Error loading farms',
+            description: `Could not load your farm data. Status: ${response.status}`,
+            variant: 'destructive'
+          });
+        }
+      } catch (error) {
+        console.error('Network error:', error);
+        toast({
+          title: 'Network error',
+          description: 'Unable to connect to the server. Please make sure the backend server is running.',
+          variant: 'destructive'
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchFarmerFarms();
+  }, [user?.email, toast]);
+
+  const totalAcres = userFarms.reduce((sum, farm) => sum + farm["Farm Size (Acres)"], 0);
+  const totalTokensSold = userFarms.reduce((sum, farm) => sum + farm["Tokens Sold"], 0);
+  const totalTokens = userFarms.reduce((sum, farm) => sum + farm["Number of Tokens"], 0);
+  const lastRevenue = userFarms.reduce((sum, farm) => sum + (farm["Price per Token (USD)"] * farm["Tokens Sold"] * 0.125), 0); // 12.5% APY
+  const nextExpectedPayout = userFarms.reduce((sum, farm) => sum + (farm["Price per Token (USD)"] * farm["Tokens Sold"] * 0.125), 0); // 12.5% APY
 
   const handleSimulateEvent = async (eventType: 'drought' | 'flood' | 'normal') => {
     setIsSimulating(true);
@@ -76,6 +135,68 @@ export default function FarmerDashboard() {
     setIsSimulating(false);
   };
 
+  const handleSimulatePayout = async () => {
+    if (userFarms.length === 0) return;
+    
+    setIsSimulating(true);
+    
+    try {
+      // Use the first farm for simulation
+      const farm = userFarms[0];
+      const payoutAmount = farm["Price per Token (USD)"] * farm["Tokens Sold"] * 0.125; // 12.5% APY
+      
+      const response = await fetch('http://localhost:8000/api/simulate-payout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          farm_id: farm["Farm ID"],
+          payout_amount: payoutAmount,
+          payout_date: new Date().toISOString().split('T')[0],
+          description: `Q3 2024 Harvest Dividend - ${farm["Farm Name"]}`
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        
+        toast({
+          title: 'Payout simulation completed!',
+          description: `Total payout: $${result.total_payout.toLocaleString()} to ${result.payout_details.length} investors`,
+        });
+
+        // Add to distributions for display
+        addDistribution({
+          id: `payout_${Date.now()}`,
+          farmId: farm["Farm ID"],
+          type: 'harvest',
+          date: result.payout_date,
+          gross: result.total_payout,
+          fees: 0,
+          net: result.total_payout,
+          recipientsCount: result.payout_details.length,
+          status: 'completed'
+        });
+      } else {
+        const error = await response.json();
+        toast({
+          title: 'Payout simulation failed',
+          description: error.detail || 'An error occurred during payout simulation.',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Network error',
+        description: 'Unable to connect to the server.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSimulating(false);
+    }
+  };
+
   if (!user) {
     return <div>Please log in to access the farmer dashboard.</div>;
   }
@@ -99,7 +220,7 @@ export default function FarmerDashboard() {
           title="Tokens Sold"
           value={totalTokensSold}
           icon={Coins}
-          subtitle={`of ${userFarms.reduce((sum, farm) => sum + farm.tokenSupply, 0)} total`}
+          subtitle={`of ${totalTokens} total`}
         />
         <StatCard
           title="Last Harvest Revenue"
@@ -244,42 +365,79 @@ export default function FarmerDashboard() {
           </div>
 
           <div className="grid gap-6">
-            {userFarms.map((farm) => (
-              <Card key={farm.id}>
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle>{farm.name}</CardTitle>
-                      <CardDescription>{farm.location} • {farm.acres} acres • {farm.crop}</CardDescription>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm text-muted-foreground">ASA ID</div>
-                      <div className="font-mono text-sm">{farm.asaId}</div>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div>
-                      <div className="text-sm text-muted-foreground">Token Supply</div>
-                      <div className="font-medium">{farm.tokenSupply.toLocaleString()}</div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground">Tokens Sold</div>
-                      <div className="font-medium">{farm.tokensSold.toLocaleString()}</div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground">Price/Token</div>
-                      <div className="font-medium">${farm.pricePerToken}</div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground">Status</div>
-                      <div className="font-medium capitalize">{farm.status}</div>
-                    </div>
-                  </div>
+            {isLoading ? (
+              <div className="text-center p-8">
+                <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+                <p className="text-muted-foreground">Loading your farms...</p>
+              </div>
+            ) : userFarms.length === 0 ? (
+              <Card>
+                <CardContent className="text-center p-8">
+                  <p className="text-muted-foreground mb-4">No farms found for your account.</p>
+                  <Button 
+                    variant="hero" 
+                    className="gap-2"
+                    onClick={() => navigate('/farmer/add')}
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add Your First Farm
+                  </Button>
                 </CardContent>
               </Card>
-            ))}
+            ) : (
+              userFarms.map((farm) => (
+                <Card key={farm["Farm ID"]}>
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle>{farm["Farm Name"]}</CardTitle>
+                        <CardDescription>{farm["Farm Location"]} • {farm["Farm Size (Acres)"]} acres • {farm["Crop Type"]}</CardDescription>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm text-muted-foreground">ASA ID</div>
+                        <div className="font-mono text-sm">{farm["ASA ID"]}</div>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div>
+                        <div className="text-sm text-muted-foreground">Token Supply</div>
+                        <div className="font-medium">{farm["Number of Tokens"].toLocaleString()}</div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-muted-foreground">Tokens Sold</div>
+                        <div className="font-medium">{farm["Tokens Sold"].toLocaleString()}</div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-muted-foreground">Price/Token</div>
+                        <div className="font-medium">${farm["Price per Token (USD)"]}</div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-muted-foreground">Status</div>
+                        <div className="font-medium capitalize">{farm["Farm Status"]}</div>
+                      </div>
+                    </div>
+                    <div className="mt-4 pt-4 border-t">
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <div>
+                          <div className="text-sm text-muted-foreground">Est. APY</div>
+                          <div className="font-medium text-green-600">{farm["Est. APY"]}%</div>
+                        </div>
+                        <div>
+                          <div className="text-sm text-muted-foreground">Harvest Date</div>
+                          <div className="font-medium">{farm["Harvest Date"]}</div>
+                        </div>
+                        <div>
+                          <div className="text-sm text-muted-foreground">Tokens Available</div>
+                          <div className="font-medium">{farm["Tokens Available"].toLocaleString()}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
         </TabsContent>
 
@@ -305,14 +463,14 @@ export default function FarmerDashboard() {
                   </thead>
                   <tbody>
                     {userFarms.map((farm) => (
-                      <tr key={farm.id} className="border-b">
-                        <td className="p-2 font-medium">{farm.name}</td>
-                        <td className="p-2">{farm.crop}</td>
-                        <td className="p-2 text-right">{farm.lastYieldPerAcre}</td>
-                        <td className="p-2 text-right">{farm.expectedYieldPerAcre}</td>
-                        <td className="p-2 text-right">${farm.lastRevenuePerAcre}</td>
-                        <td className="p-2 text-right">${farm.expectedRevenuePerAcre}</td>
-                        <td className="p-2">{farm.harvestWindow}</td>
+                      <tr key={farm["Farm ID"]} className="border-b">
+                        <td className="p-2 font-medium">{farm["Farm Name"]}</td>
+                        <td className="p-2">{farm["Crop Type"]}</td>
+                        <td className="p-2 text-right">5000</td>
+                        <td className="p-2 text-right">5000</td>
+                        <td className="p-2 text-right">${(farm["Price per Token (USD)"] * farm["Tokens Sold"] * 0.125 / farm["Farm Size (Acres)"]).toFixed(2)}</td>
+                        <td className="p-2 text-right">${(farm["Price per Token (USD)"] * farm["Tokens Sold"] * 0.125 / farm["Farm Size (Acres)"]).toFixed(2)}</td>
+                        <td className="p-2">{farm["Harvest Date"]}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -330,9 +488,14 @@ export default function FarmerDashboard() {
                   <CardTitle>Payout History</CardTitle>
                   <CardDescription>All harvest and insurance distributions</CardDescription>
                 </div>
-                <Button variant="hero" className="gap-2">
+                <Button 
+                  variant="hero" 
+                  className="gap-2"
+                  onClick={() => handleSimulatePayout()}
+                  disabled={userFarms.length === 0}
+                >
                   <Zap className="h-4 w-4" />
-                  Trigger Harvest Payout
+                  Simulate Harvest Payout
                 </Button>
               </div>
             </CardHeader>
