@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -7,6 +7,7 @@ import { useAppStore } from "@/lib/store";
 import { useToast } from "@/hooks/use-toast";
 export function Navbar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const {
     user,
     setUser,
@@ -41,6 +42,14 @@ export function Navbar() {
       description: user?.connectedWallet ? "Pera Wallet disconnected" : "Connected to Pera Wallet: ALGO_TEST_...1234"
     });
   };
+  const handleProfileClick = () => {
+    if (user) {
+      // Navigate to the appropriate dashboard based on user role
+      const dashboardPath = user.role === 'farmer' ? '/farmer' : '/investor';
+      navigate(dashboardPath);
+    }
+  };
+
   const handleLogout = () => {
     setUser(null);
     window.location.href = "/";
@@ -73,11 +82,18 @@ export function Navbar() {
         <div className="flex items-center gap-4">
           {/* User Menu */}
           {user ? <div className="flex items-center gap-2">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-                  {user.name.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleProfileClick}
+                className="h-8 w-8 p-0 rounded-full"
+              >
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback className="bg-primary text-primary-foreground text-sm">
+                    {user.name.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
               <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-2">
                 <LogOut className="h-4 w-4" />
                 <span className="hidden sm:inline">Logout</span>
